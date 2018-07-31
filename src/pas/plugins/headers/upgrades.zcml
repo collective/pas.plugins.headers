@@ -3,13 +3,11 @@
   xmlns:genericsetup="http://namespaces.zope.org/genericsetup">
 
   <!-- -*- extra stuff goes here -*- -->
-  <!--<genericsetup:upgradeStep
+  <!--<genericsetup:upgradeDepends
     source="*"
     destination="1001"
-    title="Reload GS profiles"
-    description=""
+    title="Reload GS profile"
     profile="pas.plugins.headers:default"
-    handler=".upgrades.reload_gs_profile"
     />-->
 
 
