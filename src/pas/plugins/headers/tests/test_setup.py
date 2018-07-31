@@ -23,15 +23,6 @@ class TestSetup(unittest.TestCase):
         self.assertTrue(self.installer.isProductInstalled(
             'pas.plugins.headers'))
 
-    def test_browserlayer(self):
-        """Test that IPasPluginsHeadersLayer is registered."""
-        from pas.plugins.headers.interfaces import (
-            IPasPluginsHeadersLayer)
-        from plone.browserlayer import utils
-        self.assertIn(
-            IPasPluginsHeadersLayer,
-            utils.registered_layers())
-
 
 class TestUninstall(unittest.TestCase):
 
@@ -49,12 +40,3 @@ class TestUninstall(unittest.TestCase):
         """Test if pas.plugins.headers is cleanly uninstalled."""
         self.assertFalse(self.installer.isProductInstalled(
             'pas.plugins.headers'))
-
-    def test_browserlayer_removed(self):
-        """Test that IPasPluginsHeadersLayer is removed."""
-        from pas.plugins.headers.interfaces import \
-            IPasPluginsHeadersLayer
-        from plone.browserlayer import utils
-        self.assertNotIn(
-            IPasPluginsHeadersLayer,
-            utils.registered_layers())
