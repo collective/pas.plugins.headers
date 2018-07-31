@@ -29,37 +29,37 @@ def post_install(context):
     if ID not in pas.objectIds():
         from pas.plugins.headers.plugins import HeaderPlugin
         plugin = HeaderPlugin(
-            title="Request Headers",
+            title='Request Headers',
         )
         plugin.id = ID
         pas._setObject(ID, plugin)
-        logger.info("Created %s in acl_users.", ID)
+        logger.info('Created %s in acl_users.', ID)
     plugin = getattr(pas, ID)
 
     # Activate all supported interfaces for this plugin.
     activate = []
     plugins = pas.plugins
     for info in plugins.listPluginTypeInfo():
-        interface = info["interface"]
-        interface_name = info["id"]
+        interface = info['interface']
+        interface_name = info['id']
         if plugin.testImplements(interface):
             activate.append(interface_name)
             logger.info(
-                "Activating interface %s for plugin %s",
-                interface_name, info["title"])
+                'Activating interface %s for plugin %s',
+                interface_name, info['title'])
 
     plugin.manage_activateInterfaces(activate)
-    logger.info("Plugins activated.")
+    logger.info('Plugins activated.')
 
     # Order some plugins to make sure our plugin is at the top.
     # This is not needed for all plugin interfaces.
     for info in plugins.listPluginTypeInfo():
-        interface_name = info["id"]
+        interface_name = info['id']
         if interface_name in ['IChallengePlugin', 'IPropertiesPlugin']:
             iface = plugins._getInterfaceFromName(interface_name)
             for obj in plugins.listPlugins(iface):
                 plugins.movePluginsUp(iface, [ID])
-            logger.info("Moved %s to top of %s.", ID, interface_name)
+            logger.info('Moved %s to top of %s.', ID, interface_name)
 
 
 def uninstall(context):

@@ -67,9 +67,6 @@ def decode_header(value):
 def get_fullname(props):
     """Get fullname from properties.
 
-    TODO: Where do we handle utf-8/unicode conversion?
-    TODO: Currently I get a failure when saving fullname to mysql.
-
     For a standard Plone user, member.getProperty('fullname')
     returns an encoded string.  So *no* unicode.
     """
@@ -78,7 +75,7 @@ def get_fullname(props):
     firstname = decode_header(props.get('voornaam', ''))
     prefix = decode_header(props.get('tussenvoegsel', ''))
     surname = decode_header(props.get('achternaam', ''))
-    fullname = u'%s %s %s' % (firstname, prefix, surname)
+    fullname = u'{0} {1} {2}'.format(firstname, prefix, surname)
     # The next line removes double spaces when there is no prefix.
     fullname = u' '.join(fullname.split())
     fullname = fullname.encode('utf-8')
@@ -216,7 +213,7 @@ class HeaderPlugin(BasePlugin):
         return (request_id, request_id)
 
     def getPropertiesForUser(self, user, request=None):
-        """ user -> {}
+        """ user -> {...}
 
         For IPropertiesPlugin.
 
@@ -242,8 +239,6 @@ class HeaderPlugin(BasePlugin):
             return
         user_id = user.getUserId()
         if get_header_uid(request) != user_id:
-            # TODO: use the request_id from the user to get data from mysql?
-            # But we should not really need this, I guess.
             return
         props = get_all_header_properties(request)
         # Instead of first/middle/last name, we only need fullname.
