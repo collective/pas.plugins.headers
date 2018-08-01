@@ -76,3 +76,21 @@ class ParsersUnitTests(unittest.TestCase):
         self.assertEqual(_upper('  \n\t\r  NO   '), 'NO')
         self.assertEqual(_upper('ONE  two\n THRee'), 'ONE  TWO\n THREE')
         self.assertEqual(_upper('42'), '42')
+
+    def test_parse(self):
+        from pas.plugins.headers.parsers import parse
+        self.assertEqual(parse(None, 'Value'), 'Value')
+        self.assertEqual(parse('bool', 'Value'), False)
+        self.assertEqual(parse('int', 'Value'), 0)
+        self.assertEqual(parse('lower', 'Value'), 'value')
+        self.assertEqual(parse('upper', 'Value'), 'VALUE')
+
+        self.assertEqual(parse('bool', 'y'), True)
+        self.assertEqual(parse('int', 'y'), 0)
+        self.assertEqual(parse('lower', 'y'), 'y')
+        self.assertEqual(parse('upper', 'y'), 'Y')
+
+        self.assertEqual(parse('bool', '1'), True)
+        self.assertEqual(parse('int', '1'), 1)
+        self.assertEqual(parse('lower', '1'), '1')
+        self.assertEqual(parse('upper', '1'), '1')
