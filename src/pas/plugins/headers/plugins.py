@@ -99,23 +99,6 @@ def get_header_role(request):
     return role
 
 
-def get_all_header_properties(request):
-    """Get all known properties from the request headers.
-
-    Returns a dictionary.
-    """
-    result = {}
-    if request is None:
-        return result
-    for plone_prop, header_prop in PROPS.items():
-        value = request.getHeader(header_prop, '').strip()
-        if plone_prop == 'rol':
-            # For one leerling we get role Leerling with capital letter.
-            value = value.lower()
-        result[plone_prop] = value
-    return result
-
-
 class HeaderPlugin(BasePlugin):
     """PAS Plugin which use information from request headers.
 

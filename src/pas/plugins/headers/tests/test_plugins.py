@@ -156,40 +156,37 @@ class HeaderPluginUnitTests(unittest.TestCase):
         )
 
     def test_get_all_header_properties(self):
-        from pas.plugins.headers.plugins import get_all_header_properties
-        auth_header = 'SAML_id'
+        plugin = self._makeOne()
+        auth_header = plugin.userid_header
         request = HeaderRequest()
         self.assertEqual(
-            get_all_header_properties(request),
-            {'achternaam': '',
+            plugin._get_all_header_properties(request),
+            {'fullname': '',
              'rol': '',
              'schoolbrin': '',
-             'tussenvoegsel': '',
              'uid': '',
-             'voornaam': ''})
+             })
         request.addHeader('EA_PROFILE_foo', 'bar')
         request.addHeader('EA_PROFILE_firstname', 'Maurits')
         request.addHeader('EA_PROFILE_middlename', 'van')
         self.assertEqual(
-            get_all_header_properties(request),
-            {'achternaam': '',
+            plugin._get_all_header_properties(request),
+            {'fullname': 'Maurits van',
              'rol': '',
              'schoolbrin': '',
-             'tussenvoegsel': 'van',
              'uid': '',
-             'voornaam': 'Maurits'})
+             })
         request.addHeader('EA_PROFILE_lastname', 'Rees')
         request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
         request.addHeader(auth_header, 'my uid')
         request.addHeader(ROLE_HEADER, 'docent')
         self.assertEqual(
-            get_all_header_properties(request),
-            {'achternaam': 'Rees',
+            plugin._get_all_header_properties(request),
+            {'fullname': 'Maurits van Rees',
              'rol': 'docent',
              'schoolbrin': 'AA44ZT',
-             'tussenvoegsel': 'van',
              'uid': 'my uid',
-             'voornaam': 'Maurits'})
+             })
 
     def test_no_challenge(self):
         # By default we do not challenge, because we do not know how.
