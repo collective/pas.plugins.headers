@@ -63,7 +63,8 @@ These are the properties that you can edit:
 
 ``required_headers``:
     Required headers.
-    Without these, the plugin does not authenticate.
+    Without these, the extraction plugin does not extract headers, so the user is not authenticated.
+    These headers may have an empty value in the request, as long as they are all there.
 
 ``deny_unauthorized``:
     Deny unauthorized access.

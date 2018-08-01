@@ -40,6 +40,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         from pas.plugins.headers.plugins import HeaderPlugin
         plugin = HeaderPlugin()
         plugin.userid_header = 'EA_PROFILE_uid'
+        plugin.required_headers = ('EA_PROFILE_uid', 'EA_PROFILE_role')
         plugin.deny_unauthorized = True
         # plugin.role_header = 'EA_PROFILE_role'
         # plugin.allowed_roles = ['docent', 'leerling']
@@ -267,6 +268,15 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(plugin.extractCredentials(request),
                          {'role': 'leerling', 'request_id': 'my uid'})
         request.addHeader(ROLE_HEADER, 'Leerling   ')
+        self.assertEqual(plugin.extractCredentials(request),
+                         {'role': 'leerling', 'request_id': 'my uid'})
+
+        # Now test with required_headers
+        plugin.required_headers = ('HEADER1', 'HEADER2')
+        self.assertEqual(plugin.extractCredentials(request), {})
+        request.addHeader('HEADER1', '')
+        self.assertEqual(plugin.extractCredentials(request), {})
+        request.addHeader('HEADER2', '')
         self.assertEqual(plugin.extractCredentials(request),
                          {'role': 'leerling', 'request_id': 'my uid'})
 

@@ -39,6 +39,8 @@ TEMP_PROPS = [
     'tussenvoegsel',
     'achternaam',
 ]
+# Marker value for missing headers
+_MARKER = object()
 
 
 def decode_header(value):
@@ -172,6 +174,9 @@ class HeaderPlugin(BasePlugin):
           appropriate credentials.
         """
         creds = {}
+        for header in self.required_headers:
+            if request.getHeader(header, _MARKER) is _MARKER:
+                return creds
         creds['request_id'] = self._get_userid(request)
         creds['role'] = get_header_role(request)
         return creds
