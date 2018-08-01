@@ -95,6 +95,15 @@ class ParsersUnitTests(unittest.TestCase):
         self.assertEqual(parse('lower', '1'), '1')
         self.assertEqual(parse('upper', '1'), '1')
 
+        # Test a corner case of the parse function:
+        # catch some errors in parsers.
+        def simple_lower(value):
+            return value.no_such_attribute
+
+        from pas.plugins.headers.parsers import register_parser
+        register_parser('simple', simple_lower)
+        self.assertEqual(parse('simple', 'foo'), 'foo')
+
     def test_register_parser_and_get_parser(self):
         # They only make sense to test in combination.
         from pas.plugins.headers.parsers import register_parser

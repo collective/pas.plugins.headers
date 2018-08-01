@@ -110,6 +110,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         from pas.plugins.headers.plugins import HeaderPlugin
         plugin = HeaderPlugin()
         auth_header = 'SAML_id'
+        self.assertEqual(plugin._get_userid(None), None)
         request = HeaderRequest()
         self.assertEqual(plugin._get_userid(request), None)
         request.addHeader(auth_header, 'foo')
@@ -122,6 +123,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
     def test_get_header_role(self):
         from pas.plugins.headers.plugins import get_header_role
+        self.assertEqual(get_header_role(None), None)
         request = HeaderRequest()
         self.assertEqual(get_header_role(request), None)
         request.addHeader(ROLE_HEADER, 'foo')
@@ -156,9 +158,55 @@ class HeaderPluginUnitTests(unittest.TestCase):
             ]
         )
 
+        # Test some corner cases.
+        plugin.memberdata_to_header = ()
+        self.assertEqual(plugin._parse_memberdata_to_header(), [])
+        plugin.memberdata_to_header = ('',)
+        self.assertEqual(plugin._parse_memberdata_to_header(), [])
+        plugin.memberdata_to_header = (
+            '  hi     |     there     ',
+        )
+        self.assertEqual(
+            plugin._parse_memberdata_to_header(),
+            [('hi', ['there'], None)]
+        )
+        plugin.memberdata_to_header = (
+            '# ignore|me',
+            'hi|there',
+        )
+        self.assertEqual(
+            plugin._parse_memberdata_to_header(),
+            [('hi', ['there'], None)]
+        )
+        plugin.memberdata_to_header = (
+            'too|many|pipes|for|me',
+            'hi|there',
+        )
+        self.assertEqual(
+            plugin._parse_memberdata_to_header(),
+            [('hi', ['there'], None)]
+        )
+        plugin.memberdata_to_header = (
+            '   |missing_memberdata',
+            'hi|there',
+        )
+        self.assertEqual(
+            plugin._parse_memberdata_to_header(),
+            [('hi', ['there'], None)]
+        )
+        plugin.memberdata_to_header = (
+            'missing_headers|   ',
+            'hi|there',
+        )
+        self.assertEqual(
+            plugin._parse_memberdata_to_header(),
+            [('hi', ['there'], None)]
+        )
+
     def test_get_all_header_properties(self):
         plugin = self._makeOne()
         auth_header = plugin.userid_header
+        self.assertEqual(plugin._get_all_header_properties(None), {})
         request = HeaderRequest()
         self.assertEqual(
             plugin._get_all_header_properties(request),
@@ -337,3 +385,12 @@ class HeaderPluginUnitTests(unittest.TestCase):
              'uid': 'maurits'})
         arthur = DummyUser('arthur')
         self.assertIsNone(plugin.getPropertiesForUser(arthur, request))
+
+    def test_add_header_plugin(self):
+        # We could create a function or form for adding the plugin manually,
+        # but we prefer to do this via GenericSetup.
+        # Maybe it is easy.
+        # Anyway, we *do* need to register such a function.
+        # So let's at least call it and see that nothing breaks.
+        from pas.plugins.headers.plugins import add_header_plugin
+        add_header_plugin()

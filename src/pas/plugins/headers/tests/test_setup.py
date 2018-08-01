@@ -32,6 +32,28 @@ class TestSetup(unittest.TestCase):
         plugin = getattr(pas, plugin_id)
         self.assertIsInstance(plugin, HeaderPlugin)
 
+    def test_double_install(self):
+        # A double install should not cause trouble.
+        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
+        pas = api.portal.get_tool('acl_users')
+        plugin_id = 'request_headers'
+        pas._delObject(plugin_id)
+        pas._setObject(plugin_id, BasePlugin())
+        from pas.plugins.headers.setuphandlers import post_install
+        with self.assertRaises(ValueError):
+            post_install(self.portal)
+
+    def test_uninstall_with_bad_plugin(self):
+        # When a different plugin with 'our' id is found, we do not remove it.
+        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
+        pas = api.portal.get_tool('acl_users')
+        plugin_id = 'request_headers'
+        pas._delObject(plugin_id)
+        pas._setObject(plugin_id, BasePlugin())
+        from pas.plugins.headers.setuphandlers import uninstall
+        uninstall(self.portal)
+        self.assertIn(plugin_id, pas.objectIds())
+
 
 class TestUninstall(unittest.TestCase):
 
@@ -55,3 +77,8 @@ class TestUninstall(unittest.TestCase):
         pas = api.portal.get_tool('acl_users')
         plugin_id = 'request_headers'
         self.assertNotIn(plugin_id, pas.objectIds())
+
+    def test_double_uninstall(self):
+        # A double uninstall should not cause trouble.
+        from pas.plugins.headers.setuphandlers import uninstall
+        uninstall(self.portal)

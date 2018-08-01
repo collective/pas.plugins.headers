@@ -60,9 +60,9 @@ def decode_header(value):
         pass
     try:
         return value.decode('latin-1')
-    except UnicodeDecodeError:
-        pass
-    return value.decode('utf-8', 'ignore')
+    except UnicodeDecodeError:  # pragma: no cover
+        # I don't know how to trigger this in tests.
+        return value.decode('utf-8', 'ignore')
 
 
 def combine_values(values):
@@ -255,7 +255,8 @@ class HeaderPlugin(BasePlugin):
                 parser = None
             elif pipes == 2:
                 member_prop, headers, parser = line.split('|')
-            else:
+            else:  # pragma: no cover
+                # We are testing for this, but coverage does not see it.
                 continue
             member_prop = member_prop.strip()
             if not member_prop:
