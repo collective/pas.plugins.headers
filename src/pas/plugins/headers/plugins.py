@@ -149,6 +149,30 @@ class HeaderPlugin(BasePlugin):
 
     security = ClassSecurityInfo()
 
+    userid_header = ''
+    required_headers = ()
+    deny_unauthorized = False
+    redirect_url = ''
+    memberdata_to_header = ()
+    _properties = (
+        dict(id='userid_header', type='string', mode='w',
+             label='Header to use as user id'),
+        dict(id='required_headers', type='lines', mode='w',
+             label='Required headers.',
+             # Note: description is currently not shown anywhere in the ZMI.
+             description='Without these, the plugin does not authenticate.',
+             ),
+        dict(id='deny_unauthorized', type='boolean', mode='w',
+             label='Deny unauthorized access. '
+                   'Do not redirect to a login form.'),
+        dict(id='redirect_url', type='string', mode='w',
+             label='URL to redirect to when unauthorized and unauthenticated'),
+        dict(id='memberdata_to_header', type='lines', mode='w',
+             label='Mapping from memberdata property to request header. '
+                   'Format: propname|header1 header2',
+             ),
+    )
+
     def challenge(self, request, response):
         """ Assert via the response that credentials will be gathered.
 
@@ -156,25 +180,25 @@ class HeaderPlugin(BasePlugin):
 
         Takes a REQUEST object and a RESPONSE object.
 
-        Returns True if it fired, False otherwise.
+        Must return True if it fired, False/None otherwise.
 
-        In our case, we can either give an error,
-        or redirect to some page elsewhere.
-        But when there is no auth header, the proxy will already
-        stop the user.  So giving an error is fine.
-
-        We could check the domain: do not challenge when you are on cms
-        or 127.0.0.1.  But we would need to watch out for virtual host
-        rewriting then.  Anyway, if you are not logged in, and go to
-        the login form, everything will still work, and you will not
-        be challenged.
+        Note: if you are not logged in, and go to the login form,
+        everything will still work, and you will not be challenged.
+        A challenge is only tried when you are unauthorized.
         """
-        if get_header_uid(request) and get_header_role(request):
-            return
-        logger.error('Error: No authentication request headers found.')
-        response.write(
-            'Fout: Geen correcte authenticatie headers gevonden.\n')
-        return True
+        if self.deny_unauthorized:
+            # We do not give the user a change to login.
+            response.write(
+                'ERROR: denying any unauthorized access.\n')
+            return True
+        if self.redirect_url:
+            logger.debug('Redirecting to %s', self.redirect_url)
+            response.redirect(self.redirect_url)
+            return True
+        # We have no redirect_url, so we do not know how to challenge.
+        # Let Plone handle this in the default way, probably showing
+        # a login form.
+        return
 
     def extractCredentials(self, request):
         """ request -> {...}

@@ -163,55 +163,66 @@ class HeaderPluginUnitTests(unittest.TestCase):
              'uid': 'my uid',
              'voornaam': 'Maurits'})
 
-    def test_challenge(self):
-        from pas.plugins.headers.plugins import HeaderPlugin
-        request = HeaderRequest()
-        out = StringIO()
-        response = HTTPResponse(stdout=out)
-        # When the plugin makes a challenge, it must return a True value.
-        self.assertTrue(HeaderPlugin().challenge(request, response))
-        out.seek(0)
-        self.assertIn(
-            'Fout: Geen correcte authenticatie headers gevonden.',
-            out.read())
-
-        # Adding an auth header is not enough.
-        request = HeaderRequest()
-        request.addHeader(AUTH_HEADER, 'my uid')
-        out = StringIO()
-        response = HTTPResponse(stdout=out)
-        self.assertTrue(HeaderPlugin().challenge(request, response))
-        out.seek(0)
-        self.assertIn(
-            'Fout: Geen correcte authenticatie headers gevonden.',
-            out.read())
-
-        # Adding an auth header plus a wrong role header does not fool us.
-        request = HeaderRequest()
-        request.addHeader(AUTH_HEADER, 'my uid')
-        request.addHeader(ROLE_HEADER, 'admin')
-        out = StringIO()
-        response = HTTPResponse(stdout=out)
-        self.assertTrue(HeaderPlugin().challenge(request, response))
-        out.seek(0)
-        self.assertIn(
-            'Fout: Geen correcte authenticatie headers gevonden.',
-            out.read())
-
     def test_no_challenge(self):
+        # By default we do not challenge, because we do not know how.
+        # Prepare the plugin.
         from pas.plugins.headers.plugins import HeaderPlugin
+        plugin = HeaderPlugin()
+
+        # Prepare the request.
         request = HeaderRequest()
-        request.addHeader(AUTH_HEADER, 'my uid')
-        request.addHeader(ROLE_HEADER, 'leerling')
         out = StringIO()
         response = HTTPResponse(stdout=out)
+
         # When the plugin does not make a challenge, it must not return a
         # value.
-        self.assertFalse(HeaderPlugin().challenge(request, response))
+        self.assertFalse(plugin.challenge(request, response))
+
+        # Check the response.
         out.seek(0)
         self.assertNotIn(
             'Fout: Geen authenticatie headers gevonden.',
             out.read())
+
+    def test_challenge_deny(self):
+        # Prepare the plugin.
+        from pas.plugins.headers.plugins import HeaderPlugin
+        plugin = HeaderPlugin()
+        plugin.deny_unauthorized = True
+
+        # Prepare the request.
+        request = HeaderRequest()
+        out = StringIO()
+        response = HTTPResponse(stdout=out)
+
+        # When the plugin makes a challenge, it must return a True value.
+        self.assertTrue(plugin.challenge(request, response))
+
+        # Check the response.
+        out.seek(0)
+        self.assertIn(
+            'ERROR: denying any unauthorized access.',
+            out.read())
+
+    def test_challenge_redirect(self):
+        # Prepare the plugin.
+        from pas.plugins.headers.plugins import HeaderPlugin
+        plugin = HeaderPlugin()
+        url = 'https://example.org/saml-login'
+        plugin.redirect_url = url
+
+        # Prepare the request.
+        request = HeaderRequest()
+        out = StringIO()
+        response = HTTPResponse(stdout=out)
+
+        # When the plugin makes a challenge, it must return a True value.
+        self.assertTrue(plugin.challenge(request, response))
+
+        # Check the response.
+        out.seek(0)
+        self.assertEqual(out.read(), '')
+        self.assertEqual(response.headers['location'], url)
 
     def test_extractCredentials(self):
         from pas.plugins.headers.plugins import HeaderPlugin
