@@ -13,8 +13,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# This is the main authentication header.
-AUTH_HEADER = 'EA_PROFILE_uid'
 # This header contains the role.
 ROLE_HEADER = 'EA_PROFILE_role'
 # Roles that we can handle:
@@ -24,7 +22,7 @@ ROLES = [
 ]
 # Mapping from Plone memberdata property ids to request header ids.
 PROPS = {
-    'uid': AUTH_HEADER,
+    'uid': 'EA_PROFILE_uid',
     'voornaam': 'EA_PROFILE_firstname',
     'tussenvoegsel': 'EA_PROFILE_middlename',
     'achternaam': 'EA_PROFILE_lastname',
@@ -80,13 +78,6 @@ def get_fullname(props):
     fullname = u' '.join(fullname.split())
     fullname = fullname.encode('utf-8')
     return fullname
-
-
-def get_header_uid(request):
-    """Get uid property from the request headers."""
-    if request is None:
-        return
-    return request.getHeader(AUTH_HEADER)
 
 
 def get_header_role(request):
@@ -211,7 +202,7 @@ class HeaderPlugin(BasePlugin):
           appropriate credentials.
         """
         creds = {}
-        creds['request_id'] = get_header_uid(request)
+        creds['request_id'] = self._get_userid(request)
         creds['role'] = get_header_role(request)
         return creds
 
@@ -262,7 +253,7 @@ class HeaderPlugin(BasePlugin):
             # This seems to only happen for admins.
             return
         user_id = user.getUserId()
-        if get_header_uid(request) != user_id:
+        if self._get_userid(request) != user_id:
             return
         props = get_all_header_properties(request)
         # Instead of first/middle/last name, we only need fullname.
@@ -270,6 +261,14 @@ class HeaderPlugin(BasePlugin):
         for prop in TEMP_PROPS:
             props.pop(prop, None)
         return props
+
+    def _get_userid(self, request):
+        """Get userid property from the request headers."""
+        if request is None:
+            return
+        if not self.userid_header:
+            return
+        return request.getHeader(self.userid_header)
 
 
 InitializeClass(HeaderPlugin)

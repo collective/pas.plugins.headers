@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from pas.plugins.headers.plugins import AUTH_HEADER
 from pas.plugins.headers.plugins import ROLE_HEADER
 from StringIO import StringIO
 from zope.publisher.browser import TestRequest
@@ -76,12 +75,19 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertTrue(isinstance(get_fullname(
             {'voornaam': u'Arth\xfcr'}), str))
 
-    def test_get_header_uid(self):
-        from pas.plugins.headers.plugins import get_header_uid
+    def test_get_userid(self):
+        from pas.plugins.headers.plugins import HeaderPlugin
+        plugin = HeaderPlugin()
+        auth_header = 'SAML_id'
         request = HeaderRequest()
-        self.assertEqual(get_header_uid(request), None)
-        request.addHeader(AUTH_HEADER, 'foo')
-        self.assertEqual(get_header_uid(request), 'foo')
+        self.assertEqual(plugin._get_userid(request), None)
+        request.addHeader(auth_header, 'foo')
+        self.assertEqual(plugin._get_userid(request), None)
+        # Specify the userid_header that the plugin must look for.
+        plugin.userid_header = auth_header
+        self.assertEqual(plugin._get_userid(request), 'foo')
+        request = HeaderRequest()
+        self.assertEqual(plugin._get_userid(request), None)
 
     def test_get_header_role(self):
         from pas.plugins.headers.plugins import get_header_role
@@ -111,8 +117,8 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader('uid', 'my uid')
         self.assertEqual(get_header_property(request, 'uid'), '')
         # We need a different header name.
-        self.assertTrue(AUTH_HEADER.startswith('EA_PROFILE_'))
-        request.addHeader(AUTH_HEADER, 'my real uid')
+        auth_header = 'SAML_id'
+        request.addHeader(auth_header, 'my real uid')
         self.assertEqual(get_header_property(request, 'uid'), 'my real uid')
         # The role.
         self.assertTrue(ROLE_HEADER.startswith('EA_PROFILE_'))
@@ -130,6 +136,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
     def test_get_all_header_properties(self):
         from pas.plugins.headers.plugins import get_all_header_properties
+        auth_header = 'SAML_id'
         request = HeaderRequest()
         self.assertEqual(
             get_all_header_properties(request),
@@ -152,7 +159,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
              'voornaam': 'Maurits'})
         request.addHeader('EA_PROFILE_lastname', 'Rees')
         request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
-        request.addHeader(AUTH_HEADER, 'my uid')
+        request.addHeader(auth_header, 'my uid')
         request.addHeader(ROLE_HEADER, 'docent')
         self.assertEqual(
             get_all_header_properties(request),
@@ -227,10 +234,12 @@ class HeaderPluginUnitTests(unittest.TestCase):
     def test_extractCredentials(self):
         from pas.plugins.headers.plugins import HeaderPlugin
         plugin = HeaderPlugin()
+        auth_header = 'SAML_id'
+        plugin.userid_header = auth_header
         request = HeaderRequest()
         self.assertEqual(plugin.extractCredentials(request),
                          {'role': None, 'request_id': None})
-        request.addHeader(AUTH_HEADER, 'my uid')
+        request.addHeader(auth_header, 'my uid')
         self.assertEqual(plugin.extractCredentials(request),
                          {'role': None, 'request_id': 'my uid'})
         request.addHeader(ROLE_HEADER, 'pupil')
@@ -264,14 +273,16 @@ class HeaderPluginUnitTests(unittest.TestCase):
     def test_getPropertiesForUser(self):
         from pas.plugins.headers.plugins import HeaderPlugin
         plugin = HeaderPlugin()
+        auth_header = 'SAML_id'
+        plugin.userid_header = auth_header
         user = DummyUser('maurits')
         self.assertIsNone(plugin.getPropertiesForUser(user))
         request = HeaderRequest()
         self.assertIsNone(plugin.getPropertiesForUser(user, request))
-        request.addHeader(AUTH_HEADER, 'pipo')
+        request.addHeader(auth_header, 'pipo')
         # user id and auth header must be the same
         self.assertIsNone(plugin.getPropertiesForUser(user, request))
-        request.addHeader(AUTH_HEADER, 'maurits')
+        request.addHeader(auth_header, 'maurits')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
             {'fullname': '',
