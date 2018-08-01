@@ -3,12 +3,13 @@
 
 
 # yes, ja, true
-_true_chars = 'y j t'.split()
+_true_chars = 'y j t 1'.split()
 
 
 def _boolean(value):
     if not isinstance(value, basestring):
         return bool(value)
+    value = value.strip()
     if not value:
         return False
     # Compare the first character.
@@ -17,14 +18,23 @@ def _boolean(value):
 
 
 def _int(value):
-    return int(value)
+    try:
+        return int(value)
+    except (ValueError, TypeError, AttributeError):
+        return 0
 
 
 def _lower(value):
+    if not isinstance(value, basestring):
+        return ''
+    value = value.strip()
     return value.lower()
 
 
 def _upper(value):
+    if not isinstance(value, basestring):
+        return ''
+    value = value.strip()
     return value.upper()
 
 
