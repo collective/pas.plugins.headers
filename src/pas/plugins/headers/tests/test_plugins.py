@@ -164,6 +164,22 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(get_header_property(request, 'achternaam'), 'Rees')
         self.assertEqual(get_header_property(request, 'schoolbrin'), 'AA44ZT')
 
+    def test_parse_memberdata_to_header(self):
+        plugin = self._makeOne()
+        self.assertEqual(
+            plugin._parse_memberdata_to_header(),
+            [
+                ('uid', ['EA_PROFILE_uid']),
+                ('fullname', [
+                    'EA_PROFILE_firstname',
+                    'EA_PROFILE_middlename',
+                    'EA_PROFILE_lastname',
+                ]),
+                ('schoolbrin', ['EA_PROFILE_schoolbrin']),
+                ('rol', ['EA_PROFILE_role']),
+            ]
+        )
+
     def test_get_all_header_properties(self):
         from pas.plugins.headers.plugins import get_all_header_properties
         auth_header = 'SAML_id'

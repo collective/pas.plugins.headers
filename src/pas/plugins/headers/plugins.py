@@ -268,14 +268,9 @@ class HeaderPlugin(BasePlugin):
             return
         return request.getHeader(self.userid_header)
 
-    def _get_all_header_properties(self, request):
-        """Get all known properties from the request headers.
-
-        Returns a dictionary.
-        """
-        result = {}
-        if request is None:
-            return result
+    def _parse_memberdata_to_header(self):
+        """Parse the memberdata_to_header property."""
+        result = []
         for line in self.memberdata_to_header:
             line = line.strip()
             if not line:
@@ -291,6 +286,18 @@ class HeaderPlugin(BasePlugin):
             headers = headers.split()
             if not headers:
                 continue
+            result.append((member_prop, headers))
+        return result
+
+    def _get_all_header_properties(self, request):
+        """Get all known properties from the request headers.
+
+        Returns a dictionary.
+        """
+        result = {}
+        if request is None:
+            return result
+        for member_prop, headers in self._parse_memberdata_to_header():
             values = [
                 request.getHeader(header_prop, '').strip()
                 for header_prop in headers]
