@@ -49,7 +49,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
             'EA_PROFILE_middlename '
             'EA_PROFILE_lastname',
             'schoolbrin|EA_PROFILE_schoolbrin',
-            'rol|EA_PROFILE_role',
+            'rol|EA_PROFILE_role|lower',
         )
         return plugin
 
@@ -169,14 +169,17 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(
             plugin._parse_memberdata_to_header(),
             [
-                ('uid', ['EA_PROFILE_uid']),
-                ('fullname', [
-                    'EA_PROFILE_firstname',
-                    'EA_PROFILE_middlename',
-                    'EA_PROFILE_lastname',
-                ]),
-                ('schoolbrin', ['EA_PROFILE_schoolbrin']),
-                ('rol', ['EA_PROFILE_role']),
+                ('uid', ['EA_PROFILE_uid'], None),
+                ('fullname',
+                 [
+                     'EA_PROFILE_firstname',
+                     'EA_PROFILE_middlename',
+                     'EA_PROFILE_lastname',
+                 ],
+                 None
+                 ),
+                ('schoolbrin', ['EA_PROFILE_schoolbrin'], None),
+                ('rol', ['EA_PROFILE_role'], 'lower'),
             ]
         )
 

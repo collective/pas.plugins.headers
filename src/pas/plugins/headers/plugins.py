@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from .parsers import parse
 from AccessControl import ClassSecurityInfo
 from Globals import InitializeClass
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin  # noqa
@@ -277,16 +278,21 @@ class HeaderPlugin(BasePlugin):
                 continue
             if line.startswith('#'):
                 continue
-            if line.count('|') != 1:
+            pipes = line.count('|')
+            if pipes == 1:
+                member_prop, headers = line.split('|')
+                parser = None
+            elif pipes == 2:
+                member_prop, headers, parser = line.split('|')
+            else:
                 continue
-            member_prop, headers = line.split('|')
             member_prop = member_prop.strip()
             if not member_prop:
                 continue
             headers = headers.split()
             if not headers:
                 continue
-            result.append((member_prop, headers))
+            result.append((member_prop, headers, parser))
         return result
 
     def _get_all_header_properties(self, request):
@@ -297,10 +303,12 @@ class HeaderPlugin(BasePlugin):
         result = {}
         if request is None:
             return result
-        for member_prop, headers in self._parse_memberdata_to_header():
+        for member_prop, headers, parser in self._parse_memberdata_to_header():
             values = [
                 request.getHeader(header_prop, '').strip()
                 for header_prop in headers]
+            if parser is not None:
+                values = [parse(parser, value) for value in values]
             if len(values) == 1:
                 result[member_prop] = values[0]
                 continue
