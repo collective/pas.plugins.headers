@@ -35,6 +35,24 @@ class DummyUser(object):
 
 class HeaderPluginUnitTests(unittest.TestCase):
 
+    def _makeOne(self):
+        # Make a plugin and configure it like we used to have for one client.
+        from pas.plugins.headers.plugins import HeaderPlugin
+        plugin = HeaderPlugin()
+        plugin.userid_header = 'EA_PROFILE_uid'
+        plugin.deny_unauthorized = True
+        # plugin.role_header = 'EA_PROFILE_role'
+        # plugin.allowed_roles = ['docent', 'leerling']
+        plugin.memberdata_to_header = (
+            'uid|EA_PROFILE_uid',
+            'fullname|EA_PROFILE_firstname '
+            'EA_PROFILE_middlename '
+            'EA_PROFILE_lastname',
+            'schoolbrin|EA_PROFILE_schoolbrin',
+            'rol|EA_PROFILE_role',
+        )
+        return plugin
+
     def test_decode_header(self):
         from pas.plugins.headers.plugins import decode_header
         self.assertEqual(decode_header(None), None)
@@ -45,35 +63,47 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(decode_header('\xc2\xae'), u'\xae')  # utf-8
         self.assertEqual(decode_header('\xae'), u'\xae')  # latin-1
 
-    def test_get_fullname(self):
-        from pas.plugins.headers.plugins import get_fullname
-        self.assertEqual(get_fullname(None), u'')
-        self.assertEqual(get_fullname('My name'), u'')
-        self.assertEqual(get_fullname({}), u'')
-        self.assertEqual(get_fullname(
-            {'voornaam': 'Maurits'}),
+    def test_combine_values(self):
+        from pas.plugins.headers.plugins import combine_values
+        self.assertEqual(combine_values(None), u'')
+        self.assertEqual(combine_values('My name'), u'')
+        self.assertEqual(combine_values({}), u'')
+        self.assertEqual(combine_values([]), u'')
+        self.assertEqual(combine_values(()), u'')
+        self.assertEqual(combine_values(
+            ['Maurits']),
             'Maurits')
         # 'Maurits' == u'Maurits' because both contain only ascii.
         # But we *do* want to know if we get unicode or a string back.
-        self.assertTrue(isinstance(get_fullname(
-            {'voornaam': 'Maurits'}), str))
-        self.assertEqual(get_fullname(
-            {'voornaam': 'Maurits', 'achternaam': 'Rees'}),
+        self.assertTrue(isinstance(combine_values(['Maurits']), str))
+        self.assertEqual(
+            combine_values(['Maurits', 'Rees']),
             'Maurits Rees')
-        self.assertEqual(get_fullname(
-            {'voornaam': 'Maurits',
-             'tussenvoegsel': 'van',
-             'achternaam': 'Rees'}),
+        self.assertEqual(
+            combine_values(['Maurits', '', 'Rees']),
+            'Maurits Rees')
+        self.assertEqual(
+            combine_values(['Maurits', 'van', 'Rees']),
             'Maurits van Rees')
-        self.assertEqual(get_fullname(
-            {'voornaam': u'Arthur', 'achternaam': u'Dent'}),
+        self.assertEqual(
+            combine_values(['    Maurits\t\n\r  ', '  ', None, '    Rees \n']),
+            'Maurits Rees')
+        self.assertEqual(
+            combine_values((u'Arthur', u'Dent')),
             'Arthur Dent')
         # In standard Plone we get a string encoded with utf-8.
-        self.assertEqual(get_fullname(
-            {'voornaam': u'Arth\xfcr', 'achternaam': u'Dent'}),
+        self.assertEqual(
+            combine_values([u'Arth\xfcr', u'Dent']),
             'Arth\xc3\xbcr Dent')
-        self.assertTrue(isinstance(get_fullname(
-            {'voornaam': u'Arth\xfcr'}), str))
+        self.assertTrue(isinstance(combine_values([u'Arth\xfcr']), str))
+        # We can combine more than three.
+        self.assertEqual(
+            combine_values(['', 'Hello,', 'Maurits', '   ' 'van', 'Rees']),
+            'Hello, Maurits van Rees')
+        # And they can be unicode / encoded string / ascii string.
+        self.assertEqual(
+            combine_values(['Dent', u'Arth\xfcr', u'Dent', 'Arth\xc3\xbcr']),
+            'Dent Arth\xc3\xbcr Dent Arth\xc3\xbcr')
 
     def test_get_userid(self):
         from pas.plugins.headers.plugins import HeaderPlugin
@@ -271,10 +301,10 @@ class HeaderPluginUnitTests(unittest.TestCase):
         }))
 
     def test_getPropertiesForUser(self):
-        from pas.plugins.headers.plugins import HeaderPlugin
-        plugin = HeaderPlugin()
-        auth_header = 'SAML_id'
-        plugin.userid_header = auth_header
+        # from pas.plugins.headers.plugins import HeaderPlugin
+        # plugin = HeaderPlugin()
+        plugin = self._makeOne()
+        auth_header = plugin.userid_header
         user = DummyUser('maurits')
         self.assertIsNone(plugin.getPropertiesForUser(user))
         request = HeaderRequest()

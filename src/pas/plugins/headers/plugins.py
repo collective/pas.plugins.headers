@@ -62,22 +62,25 @@ def decode_header(value):
     return value.decode('utf-8', 'ignore')
 
 
-def get_fullname(props):
-    """Get fullname from properties.
+def combine_values(values):
+    """Combine several values into one.
+
+    Expected use is for getting a fullname from several values.
 
     For a standard Plone user, member.getProperty('fullname')
     returns an encoded string.  So *no* unicode.
     """
-    if not isinstance(props, dict):
+    if not isinstance(values, (list, tuple)):
         return ''
-    firstname = decode_header(props.get('voornaam', ''))
-    prefix = decode_header(props.get('tussenvoegsel', ''))
-    surname = decode_header(props.get('achternaam', ''))
-    fullname = u'{0} {1} {2}'.format(firstname, prefix, surname)
-    # The next line removes double spaces when there is no prefix.
-    fullname = u' '.join(fullname.split())
-    fullname = fullname.encode('utf-8')
-    return fullname
+    # filter out empty values.
+    values = filter(None, values)
+    # Turn values into unicode so we can safely combine them.
+    values = [decode_header(value).strip() for value in values]
+    # again filter out empty values
+    values = filter(None, values)
+    full = u' '.join(values)
+    # Encode the result.
+    return full.encode('utf-8')
 
 
 def get_header_role(request):
@@ -255,12 +258,7 @@ class HeaderPlugin(BasePlugin):
         user_id = user.getUserId()
         if self._get_userid(request) != user_id:
             return
-        props = get_all_header_properties(request)
-        # Instead of first/middle/last name, we only need fullname.
-        props['fullname'] = get_fullname(props)
-        for prop in TEMP_PROPS:
-            props.pop(prop, None)
-        return props
+        return self._get_all_header_properties(request)
 
     def _get_userid(self, request):
         """Get userid property from the request headers."""
@@ -269,6 +267,39 @@ class HeaderPlugin(BasePlugin):
         if not self.userid_header:
             return
         return request.getHeader(self.userid_header)
+
+    def _get_all_header_properties(self, request):
+        """Get all known properties from the request headers.
+
+        Returns a dictionary.
+        """
+        result = {}
+        if request is None:
+            return result
+        for line in self.memberdata_to_header:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith('#'):
+                continue
+            if line.count('|') != 1:
+                continue
+            member_prop, headers = line.split('|')
+            member_prop = member_prop.strip()
+            if not member_prop:
+                continue
+            headers = headers.split()
+            if not headers:
+                continue
+            values = [
+                request.getHeader(header_prop, '').strip()
+                for header_prop in headers]
+            if len(values) == 1:
+                result[member_prop] = values[0]
+                continue
+            result[member_prop] = combine_values(values)
+
+        return result
 
 
 InitializeClass(HeaderPlugin)
