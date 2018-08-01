@@ -23,6 +23,15 @@ class TestSetup(unittest.TestCase):
         self.assertTrue(self.installer.isProductInstalled(
             'pas.plugins.headers'))
 
+    def test_plugin_added(self):
+        """Test if the plugin is added to acl_users."""
+        from pas.plugins.headers.plugins import HeaderPlugin
+        pas = api.portal.get_tool('acl_users')
+        plugin_id = 'request_headers'
+        self.assertIn(plugin_id, pas.objectIds())
+        plugin = getattr(pas, plugin_id)
+        self.assertIsInstance(plugin, HeaderPlugin)
+
 
 class TestUninstall(unittest.TestCase):
 
@@ -40,3 +49,9 @@ class TestUninstall(unittest.TestCase):
         """Test if pas.plugins.headers is cleanly uninstalled."""
         self.assertFalse(self.installer.isProductInstalled(
             'pas.plugins.headers'))
+
+    def test_plugin_removed(self):
+        """Test if the plugin is removed from acl_users."""
+        pas = api.portal.get_tool('acl_users')
+        plugin_id = 'request_headers'
+        self.assertNotIn(plugin_id, pas.objectIds())

@@ -26,8 +26,8 @@ def post_install(context):
     plugin_id = 'request_headers'
 
     # Create plugin if it does not exist.
+    from pas.plugins.headers.plugins import HeaderPlugin
     if plugin_id not in pas.objectIds():
-        from pas.plugins.headers.plugins import HeaderPlugin
         plugin = HeaderPlugin(
             title='Request Headers',
         )
@@ -35,6 +35,9 @@ def post_install(context):
         pas._setObject(plugin_id, plugin)
         logger.info('Created %s in acl_users.', plugin_id)
     plugin = getattr(pas, plugin_id)
+    if not isinstance(plugin, HeaderPlugin):
+        raise ValueError(
+            'Existing PAS plugin {0} is not a HeaderPlugin.'.format(plugin_id))
 
     # Activate all supported interfaces for this plugin.
     activate = []
@@ -64,4 +67,17 @@ def post_install(context):
 
 def uninstall(context):
     """Uninstall script"""
-    # Do something at the end of the uninstallation of this package.
+    pas = getToolByName(context, 'acl_users')
+    plugin_id = 'request_headers'
+
+    # Remove plugin if it exists.
+    if plugin_id not in pas.objectIds():
+        return
+    from pas.plugins.headers.plugins import HeaderPlugin
+    plugin = getattr(pas, plugin_id)
+    if not isinstance(plugin, HeaderPlugin):
+        logger.warning(
+            'PAS plugin %s not removed: it is not a HeaderPlugin.', plugin_id)
+        return
+    pas._delObject(plugin_id)
+    logger.info('Removed HeaderPlugin %s from acl_users.', plugin_id)
