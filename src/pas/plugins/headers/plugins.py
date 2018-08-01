@@ -99,23 +99,6 @@ def get_header_role(request):
     return role
 
 
-def get_header_property(request, plone_property):
-    """Get a property from the request headers.
-
-    Call this with the name of the Plone portal_memberdata property.
-    """
-    if request is None:
-        return
-    header = PROPS.get(plone_property)
-    if not header:
-        return
-    value = request.getHeader(header, '').strip()
-    if plone_property == 'rol':
-        # For one leerling we get role Leerling with capital letter.
-        value = value.lower()
-    return value
-
-
 def get_all_header_properties(request):
     """Get all known properties from the request headers.
 

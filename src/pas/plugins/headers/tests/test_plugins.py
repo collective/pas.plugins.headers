@@ -136,34 +136,6 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(ROLE_HEADER, 'LEERLING    ')
         self.assertEqual(get_header_role(request), 'leerling')
 
-    def test_get_header_property(self):
-        from pas.plugins.headers.plugins import get_header_property
-        request = HeaderRequest()
-        # foo is not a defined property, so it gets None
-        self.assertEqual(get_header_property(request, 'foo'), None)
-        # uid is defined, but it is not in the request.
-        self.assertEqual(get_header_property(request, 'uid'), '')
-        # The literal property name does not work.
-        request.addHeader('uid', 'my uid')
-        self.assertEqual(get_header_property(request, 'uid'), '')
-        # We need a different header name.
-        auth_header = 'SAML_id'
-        request.addHeader(auth_header, 'my real uid')
-        self.assertEqual(get_header_property(request, 'uid'), 'my real uid')
-        # The role.
-        self.assertTrue(ROLE_HEADER.startswith('EA_PROFILE_'))
-        request.addHeader(ROLE_HEADER, 'docent')
-        self.assertEqual(get_header_property(request, 'rol'), 'docent')
-        # Try all others.
-        request.addHeader('EA_PROFILE_firstname', 'Maurits')
-        request.addHeader('EA_PROFILE_middlename', 'van')
-        request.addHeader('EA_PROFILE_lastname', 'Rees')
-        request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
-        self.assertEqual(get_header_property(request, 'voornaam'), 'Maurits')
-        self.assertEqual(get_header_property(request, 'tussenvoegsel'), 'van')
-        self.assertEqual(get_header_property(request, 'achternaam'), 'Rees')
-        self.assertEqual(get_header_property(request, 'schoolbrin'), 'AA44ZT')
-
     def test_parse_memberdata_to_header(self):
         plugin = self._makeOne()
         self.assertEqual(
