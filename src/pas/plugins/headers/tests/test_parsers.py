@@ -94,3 +94,27 @@ class ParsersUnitTests(unittest.TestCase):
         self.assertEqual(parse('int', '1'), 1)
         self.assertEqual(parse('lower', '1'), '1')
         self.assertEqual(parse('upper', '1'), '1')
+
+    def test_register_parser_and_get_parser(self):
+        # They only make sense to test in combination.
+        from pas.plugins.headers.parsers import register_parser
+        from pas.plugins.headers.parsers import get_parser
+        from pas.plugins.headers.parsers import parse
+
+        def duplicator(value):
+            return value + value
+
+        self.assertEqual(get_parser('dup'), None)
+        self.assertEqual(parse('dup', 'foo'), 'foo')
+        self.assertEqual(register_parser('dup', duplicator), None)
+        self.assertEqual(get_parser('dup'), duplicator)
+        self.assertEqual(parse('dup', 'foo'), 'foofoo')
+
+        # Overriding a parser is possible.
+
+        def triplicator(value):
+            return value + value + value
+
+        self.assertEqual(register_parser('dup', triplicator), None)
+        self.assertEqual(get_parser('dup'), triplicator)
+        self.assertEqual(parse('dup', 'foo'), 'foofoofoo')
