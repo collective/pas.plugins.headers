@@ -17,7 +17,7 @@ setup(
     version='1.0a1',
     description="PAS plugin for authentication based on request headers",
     long_description=long_description,
-    # Get more from https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    # Get more from https://pypi.org/classifiers/
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Plone",
@@ -28,10 +28,10 @@ setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
-    keywords='Python Plone',
+    keywords='Python Plone Zope PAS acl_users SAML',
     author='Maurits van Rees',
     author_email='m.van.rees@zestsoftware.nl',
-    url='https://pypi.python.org/pypi/pas.plugins.headers',
+    url='https://pypi.org/project/pas.plugins.headers',
     license='GPL version 2',
     packages=find_packages('src', exclude=['ez_setup']),
     namespace_packages=['pas', 'pas.plugins'],
@@ -42,6 +42,7 @@ setup(
         # -*- Extra requirements: -*-
         # 'plone.api>=1.8.4',
         'Products.GenericSetup>=1.8.2',
+        'Products.PluggableAuthService',
         'setuptools',
     ],
     extras_require={

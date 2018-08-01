@@ -166,7 +166,7 @@ class HeaderPlugin(BasePlugin):
              label='Deny unauthorized access. '
                    'Do not redirect to a login form.'),
         dict(id='redirect_url', type='string', mode='w',
-             label='URL to redirect to when unauthorized and unauthenticated'),
+             label='URL to redirect to when unauthorized'),
         dict(id='memberdata_to_header', type='lines', mode='w',
              label='Mapping from memberdata property to request header. '
                    'Format: propname|header1 header2',

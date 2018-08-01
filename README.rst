@@ -6,33 +6,22 @@
 pas.plugins.headers
 ===================
 
-Tell me what your product does
+This PAS plugin reads request headers and uses them for authentication.
+Think SAML headers that are set by a front web server like Apache or nginx.
+
 
 Features
 --------
 
-- Can be bullet points
+On install in Plone, the plugin is added to the ``PluggableAuthService``.
+It is registered for several plugin types:
 
+- Challenge plugin
+- Extraction plugin
+- Authentication plugin
+- Properties plugin
 
-Examples
---------
-
-This add-on can be seen in action at the following sites:
-- Is there a page on the internet where everybody can see the features?
-
-
-Documentation
--------------
-
-Full documentation for end users can be found in the "docs" folder, and is also available online at http://docs.plone.org/foo/bar
-
-
-Translations
-------------
-
-This product has been translated into
-
-- Klingon (thanks, K'Plai)
+You can configure them in the ZMI (Zope Management Interface) by editing properties in the plugin.
 
 
 Installation
@@ -48,22 +37,64 @@ Install pas.plugins.headers by adding it to your buildout::
         pas.plugins.headers
 
 
-and then running ``bin/buildout``
+and then running ``bin/buildout``.
+Start Plone and install the plugin in the Add-ons control panel.
+
+
+Plain Zope?
+-----------
+
+I would like this to work in plain Zope, but I haven't tested this yet.
+You at least need to install ``Products.PluggableAuthService`` and ``Products.GenericSetup`` before you can begin to use this plugin.
+
+
+Configuration
+-------------
+
+You can configure the plugin by going to the ZMI (Zope Management Interface).
+Go to the ``acl_users`` (``PluggableAuthService``) folder in the Plone ZMI.
+Click on the ``request_headers`` plugin.
+Go to the Properties tab.
+
+These are the properties that you can edit:
+
+``userid_header``:
+    Header to use as user id.
+
+``required_headers``:
+    Required headers.
+    Without these, the plugin does not authenticate.
+
+``deny_unauthorized``:
+    Deny unauthorized access.
+    Default: false.
+    When this is true and the user is unauthorized, the Challenge plugin stops and presents an ugly error.
+    When false, the Challenge plugin will check the ``redirect_url``.
+
+``redirect_url``:
+    URL to redirect to when unauthorized.
+    When empty, it has no effect.
+    When set, the Challenge plugin redirects unauthorized users to this url.
+    If ``deny_unauthorized`` is true, this option is ignored.
+
+``memberdata_to_header``:
+    Mapping from memberdata property to request header, one per row.
+    Format: ``propname|header``.
+    You can also combine several headers:
+    ``propname|header_with_firstname header_with_lastname``.
 
 
 Contribute
 ----------
 
-- Issue Tracker: https://github.com/collective/pas.plugins.headers/issues
-- Source Code: https://github.com/collective/pas.plugins.headers
-- Documentation: https://docs.plone.org/foo/bar
+- Issue tracker: https://github.com/collective/pas.plugins.headers/issues
+- Source code: https://github.com/collective/pas.plugins.headers
 
 
 Support
 -------
 
-If you are having issues, please let us know.
-We have a mailing list located at: project@example.com
+If you are having issues, please let us know by adding an issue to the tracker: https://github.com/collective/pas.plugins.headers/issues
 
 
 License
