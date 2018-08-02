@@ -27,6 +27,21 @@
       post_handler=".setuphandlers.uninstall"
       />
 
+  <genericsetup:importStep
+      name="pas.plugins.headers"
+      title="Header Plugin Properties"
+      description="Import properties for the request_headers HeaderPlugin."
+      handler="pas.plugins.headers.exportimport.import_properties">
+    <depends name="toolset"/>
+  </genericsetup:importStep>
+
+  <genericsetup:exportStep
+      name="pas.plugins.headers"
+      title="Header Plugin Properties"
+      description="Export properties from the request_headers HeaderPlugin."
+      handler="pas.plugins.headers.exportimport.export_properties"
+      />
+
   <utility
       factory=".setuphandlers.HiddenProfiles"
       name="pas.plugins.headers-hiddenprofiles"
