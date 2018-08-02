@@ -12,6 +12,7 @@ class FauxContext(object):
     def __init__(self, site=None, content=None):
         self.site = site
         self.content = content
+        self.exported = None
 
     def getSite(self):
         return self.site
@@ -24,9 +25,17 @@ class FauxContext(object):
         assert name == 'pas.plugins.headers.json'
         return self.content
 
+    def writeDataFile(self, filename, body, content_type):
+        assert filename == 'pas.plugins.headers.json'
+        assert content_type == 'application/json'
+        self.exported = body
 
-class TestImport(unittest.TestCase):
-    """Test our import step."""
+    def get_exported_data(self):
+        return self.exported
+
+
+class ExportImportBaseTestCase(unittest.TestCase):
+    """Base test case with handy methods for testing our export and import."""
 
     layer = PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
 
@@ -78,6 +87,10 @@ class TestImport(unittest.TestCase):
             self.plugin.userid_header,
             HeaderPlugin.userid_header,
         )
+
+
+class TestImport(ExportImportBaseTestCase):
+    """Test our import step."""
 
     def test_import_no_file(self):
         """When the import file is not there, nothing should go wrong."""
@@ -158,3 +171,50 @@ class TestImport(unittest.TestCase):
         self.assertEqual(self.plugin.redirect_url, '')
         self.assertTupleEqual(self.plugin.required_headers, ())
         self.assertEqual(self.plugin.userid_header, 'my_uid')
+
+
+class TestExport(ExportImportBaseTestCase):
+    """Test our export step."""
+
+    def test_export_default(self):
+        from pas.plugins.headers.exportimport import export_properties
+        context = self._makeContext()
+        export_properties(context)
+        # Here we test the *exact* file contents, including indentation.
+        self.assertEqual(
+            context.get_exported_data(),
+            """{
+    "deny_unauthorized": false, 
+    "memberdata_to_header": [], 
+    "redirect_url": "", 
+    "required_headers": [], 
+    "userid_header": ""
+}""",
+        )
+        self.assertDictEqual(
+            json.loads(context.get_exported_data()),
+            {
+                'deny_unauthorized': False,
+                'memberdata_to_header': [],
+                'redirect_url': '',
+                'required_headers': [],
+                'userid_header': '',
+            },
+        )
+
+    def test_export_test_settings(self):
+        from pas.plugins.headers.exportimport import export_properties
+        self._configurePlugin()
+        context = self._makeContext()
+        export_properties(context)
+        self.assertIsInstance(context.get_exported_data(), str)
+        self.assertDictEqual(
+            json.loads(context.get_exported_data()),
+            {
+                'deny_unauthorized': True,
+                'memberdata_to_header': ['foo|bar'],
+                'redirect_url': 'https://example.org',
+                'required_headers': ['foo'],
+                'userid_header': 'foo',
+            },
+        )
