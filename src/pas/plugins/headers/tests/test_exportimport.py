@@ -136,9 +136,18 @@ class TestImport(ExportImportBaseTestCase):
             ('uid', 'role'),
         )
         self.assertEqual(self.plugin.userid_header, 'uid')
+
+        # Explicitly test the types.
         # We want string, not unicode: when you save the properties form
         # in the ZMI, you always get a string.
-        # self.assertIsInstance(self.plugin.required_headers[0], str) TODO
+        # And we want tuples, not lists.
+        self.assertIsInstance(self.plugin.deny_unauthorized, bool)
+        self.assertIsInstance(self.plugin.memberdata_to_header, tuple)
+        self.assertIsInstance(self.plugin.memberdata_to_header[0], str)
+        self.assertIsInstance(self.plugin.redirect_url, str)
+        self.assertIsInstance(self.plugin.required_headers, tuple)
+        self.assertIsInstance(self.plugin.required_headers[0], str)
+        self.assertIsInstance(self.plugin.userid_header, str)
 
     def test_import_purge_false(self):
         """Test purge=false."""

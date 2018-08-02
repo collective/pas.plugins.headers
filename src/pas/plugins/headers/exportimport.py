@@ -36,8 +36,15 @@ def import_properties(context):
         if prop_name not in plugin.propertyIds():
             logger.info('Ignoring unknown property id %s.', prop_name)
             continue
-        logger.info('Setting %s to %r', prop_name, prop_value)
-        # TODO force ascii?
+        # When saving in the ZMI, you always get a string,
+        # so we want this for import too.
+        if isinstance(prop_value, unicode):
+            prop_value = prop_value.encode('utf-8')
+        elif isinstance(prop_value, list):
+            if prop_value and isinstance(prop_value[0], unicode):
+                prop_value = [v.encode('utf-8') for v in prop_value]
+        logger.debug('Setting %s to %r', prop_name, prop_value)
+        # Note that lists are automatically turned into tuples.
         plugin._setPropValue(prop_name, prop_value)
     logger.info('Imported HeaderPlugin properties.')
 
