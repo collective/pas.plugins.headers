@@ -56,6 +56,13 @@ class ExportImportBaseTestCase(unittest.TestCase):
         self.plugin.required_headers = ('foo',)
         self.plugin.userid_header = 'foo'
 
+    def _removePlugin(self):
+        """Remove the plugin."""
+        from plone import api
+        from pas.plugins.headers.utils import PLUGIN_ID
+        pas = api.portal.get_tool('acl_users')
+        pas._delObject(PLUGIN_ID)
+
     def assert_plugin_has_test_settings(self):
         """Assert that the plugin has the settings from _configurePlugin."""
         self.assertTrue(self.plugin.deny_unauthorized)
@@ -197,6 +204,40 @@ class TestImport(ExportImportBaseTestCase):
         self.assertTupleEqual(self.plugin.required_headers, ())
         self.assertEqual(self.plugin.userid_header, 'my_uid')
 
+    def test_import_no_plugin(self):
+        """Test that import does not fail when plugin is not there."""
+        from pas.plugins.headers.exportimport import import_properties
+        from pas.plugins.headers.utils import get_plugin
+        self._removePlugin()
+        settings = {
+            'purge': True,
+            'deny_unauthorized': True,
+            'userid_header': 'my_uid',
+        }
+        import_properties(self._makeContext(json.dumps(settings)))
+        self.assertIsNone(get_plugin(self.portal))
+
+    def test_import_non_dictionary(self):
+        """Test how import handles a file without a dictionary."""
+        from pas.plugins.headers.exportimport import import_properties
+        self._configurePlugin()
+        settings = [{'userid_header': 'header_user'}]
+        # Note: we might want to throw an error instead of logging an error.
+        import_properties(self._makeContext(json.dumps(settings)))
+        self.assertEqual(self.plugin.userid_header, 'foo')
+
+    def test_import_unknown_property(self):
+        """Test that import does not fail for an unknown property."""
+        from pas.plugins.headers.exportimport import import_properties
+        settings = {
+            'unknown': 'hello',
+            'userid_header': 'my_uid',
+        }
+        import_properties(self._makeContext(json.dumps(settings)))
+        self.assertEqual(self.plugin.userid_header, 'my_uid')
+        marker = object()
+        self.assertIs(getattr(self.plugin, 'unknown', marker), marker)
+
 
 class TestExport(ExportImportBaseTestCase):
     """Test our export step."""
@@ -245,3 +286,11 @@ class TestExport(ExportImportBaseTestCase):
                 'userid_header': 'foo',
             },
         )
+
+    def test_export_no_plugin(self):
+        """Test that export does not fail when plugin is not there."""
+        from pas.plugins.headers.exportimport import export_properties
+        self._removePlugin()
+        context = self._makeContext()
+        export_properties(context)
+        self.assertIsNone(context.get_exported_data())
