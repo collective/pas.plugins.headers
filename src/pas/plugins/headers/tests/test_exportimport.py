@@ -181,14 +181,16 @@ class TestExport(ExportImportBaseTestCase):
         context = self._makeContext()
         export_properties(context)
         # Here we test the *exact* file contents, including indentation.
+        # Well... there is trailing white space, so let's ignore indentation.
         self.assertEqual(
-            context.get_exported_data(),
+            '\n'.join([line.strip() for line in
+                       context.get_exported_data().splitlines()]),
             """{
-    "deny_unauthorized": false, 
-    "memberdata_to_header": [], 
-    "redirect_url": "", 
-    "required_headers": [], 
-    "userid_header": ""
+"deny_unauthorized": false,
+"memberdata_to_header": [],
+"redirect_url": "",
+"required_headers": [],
+"userid_header": ""
 }""",
         )
         self.assertDictEqual(
