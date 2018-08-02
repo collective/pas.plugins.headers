@@ -1,0 +1,14 @@
+{
+    "purge": true,
+    "deny_unauthorized": true,
+    "memberdata_to_header": [
+        "uid|HEADER_uid|lower",
+        "fullname|HEADER_firstname HEADER_lastname"
+    ],
+    "redirect_url": "https://maurits.vanrees.org",
+    "required_headers": [
+        "uid",
+        "test"
+    ],
+    "userid_header": "uid"
+}

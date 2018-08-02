@@ -14,6 +14,7 @@ class PasPluginsHeadersLayer(PloneSandboxLayer):
         # The z3c.autoinclude feature is disabled in the Plone fixture base
         # layer.
         self.loadZCML(package=pas.plugins.headers)
+        self.loadZCML(package=pas.plugins.headers.tests)
 
     def setUpPloneSite(self, portal):
         applyProfile(portal, 'pas.plugins.headers:default')

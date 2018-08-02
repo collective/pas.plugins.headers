@@ -92,6 +92,22 @@ class ExportImportBaseTestCase(unittest.TestCase):
 class TestImport(ExportImportBaseTestCase):
     """Test our import step."""
 
+    def test_import_step_in_profile(self):
+        from plone.app.testing import applyProfile
+        applyProfile(self.portal, 'pas.plugins.headers.tests:test')
+        self.assertTrue(self.plugin.deny_unauthorized)
+        self.assertTupleEqual(
+            self.plugin.memberdata_to_header,
+            (
+                'uid|HEADER_uid|lower',
+                'fullname|HEADER_firstname HEADER_lastname',
+            ),
+        )
+        self.assertEqual(
+            self.plugin.redirect_url, 'https://maurits.vanrees.org')
+        self.assertTupleEqual(self.plugin.required_headers, ('uid', 'test'))
+        self.assertEqual(self.plugin.userid_header, 'uid')
+
     def test_import_no_file(self):
         """When the import file is not there, nothing should go wrong."""
         from pas.plugins.headers.exportimport import import_properties
