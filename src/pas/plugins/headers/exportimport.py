@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pas.plugins.headers.plugins import HeaderPlugin
 from pas.plugins.headers.utils import get_plugin
+from pas.plugins.headers.utils import PLUGIN_ID
 
 import json
 
@@ -13,7 +14,7 @@ def import_properties(context):
     """
     site = context.getSite()
     body = context.readDataFile(FILENAME)
-    logger = context.getLogger('request_headers')
+    logger = context.getLogger(PLUGIN_ID)
     if not body:
         logger.info('%s not found or empty.', FILENAME)
         return
@@ -53,7 +54,7 @@ def export_properties(context):
     """Export HeaderPlugin properties.
     """
     site = context.getSite()
-    logger = context.getLogger('request_headers')
+    logger = context.getLogger(PLUGIN_ID)
     plugin = get_plugin(site)
     if plugin is None:
         return

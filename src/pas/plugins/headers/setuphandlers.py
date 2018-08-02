@@ -23,21 +23,21 @@ def post_install(context):
     """Post install script"""
     # Setup our request header plugin.
     pas = getToolByName(context, 'acl_users')
-    plugin_id = 'request_headers'
 
     # Create plugin if it does not exist.
     from pas.plugins.headers.plugins import HeaderPlugin
-    if plugin_id not in pas.objectIds():
+    from pas.plugins.headers.utils import PLUGIN_ID
+    if PLUGIN_ID not in pas.objectIds():
         plugin = HeaderPlugin(
             title='Request Headers',
         )
-        plugin.id = plugin_id
-        pas._setObject(plugin_id, plugin)
-        logger.info('Created %s in acl_users.', plugin_id)
-    plugin = getattr(pas, plugin_id)
+        plugin.id = PLUGIN_ID
+        pas._setObject(PLUGIN_ID, plugin)
+        logger.info('Created %s in acl_users.', PLUGIN_ID)
+    plugin = getattr(pas, PLUGIN_ID)
     if not isinstance(plugin, HeaderPlugin):
         raise ValueError(
-            'Existing PAS plugin {0} is not a HeaderPlugin.'.format(plugin_id))
+            'Existing PAS plugin {0} is not a HeaderPlugin.'.format(PLUGIN_ID))
 
     # Activate all supported interfaces for this plugin.
     activate = []
@@ -61,23 +61,23 @@ def post_install(context):
         if interface_name in ['IChallengePlugin', 'IPropertiesPlugin']:
             iface = plugins._getInterfaceFromName(interface_name)
             for obj in plugins.listPlugins(iface):
-                plugins.movePluginsUp(iface, [plugin_id])
-            logger.info('Moved %s to top of %s.', plugin_id, interface_name)
+                plugins.movePluginsUp(iface, [PLUGIN_ID])
+            logger.info('Moved %s to top of %s.', PLUGIN_ID, interface_name)
 
 
 def uninstall(context):
     """Uninstall script"""
+    from pas.plugins.headers.utils import PLUGIN_ID
     pas = getToolByName(context, 'acl_users')
-    plugin_id = 'request_headers'
 
     # Remove plugin if it exists.
-    if plugin_id not in pas.objectIds():
+    if PLUGIN_ID not in pas.objectIds():
         return
     from pas.plugins.headers.plugins import HeaderPlugin
-    plugin = getattr(pas, plugin_id)
+    plugin = getattr(pas, PLUGIN_ID)
     if not isinstance(plugin, HeaderPlugin):
         logger.warning(
-            'PAS plugin %s not removed: it is not a HeaderPlugin.', plugin_id)
+            'PAS plugin %s not removed: it is not a HeaderPlugin.', PLUGIN_ID)
         return
-    pas._delObject(plugin_id)
-    logger.info('Removed HeaderPlugin %s from acl_users.', plugin_id)
+    pas._delObject(PLUGIN_ID)
+    logger.info('Removed HeaderPlugin %s from acl_users.', PLUGIN_ID)
