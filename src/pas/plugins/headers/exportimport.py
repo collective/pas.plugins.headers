@@ -25,8 +25,10 @@ def import_properties(context):
     # Maybe catch ValueError.  But it gives a clear error message.
     props = json.loads(body)
     if not isinstance(props, dict):
-        logger.error('%s does not contain a json dictionary.', FILENAME)
-        return
+        # logger.error('%s does not contain a json dictionary.', FILENAME)
+        # return
+        raise ValueError(
+            '{0} does not contain a json dictionary.'.format(FILENAME))
     purge = props.pop('purge', False)
     if purge:
         for prop_name in plugin.propertyIds():

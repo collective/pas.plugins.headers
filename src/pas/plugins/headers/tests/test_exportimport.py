@@ -217,13 +217,21 @@ class TestImport(ExportImportBaseTestCase):
         import_properties(self._makeContext(json.dumps(settings)))
         self.assertIsNone(get_plugin(self.portal))
 
+    def test_import_bad_json(self):
+        """Test how import handles a bad json."""
+        from pas.plugins.headers.exportimport import import_properties
+        self._configurePlugin()
+        with self.assertRaises(ValueError):
+            import_properties(self._makeContext(
+                '{"userid_header": "missing end quote}'))
+
     def test_import_non_dictionary(self):
         """Test how import handles a file without a dictionary."""
         from pas.plugins.headers.exportimport import import_properties
         self._configurePlugin()
         settings = [{'userid_header': 'header_user'}]
-        # Note: we might want to throw an error instead of logging an error.
-        import_properties(self._makeContext(json.dumps(settings)))
+        with self.assertRaises(ValueError):
+            import_properties(self._makeContext(json.dumps(settings)))
         self.assertEqual(self.plugin.userid_header, 'foo')
 
     def test_import_unknown_property(self):
