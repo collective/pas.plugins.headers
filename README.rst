@@ -91,7 +91,6 @@ These are the properties that you can edit:
     When empty, it has no effect.
     When set, the Challenge plugin redirects unauthorized users to this url.
     If ``deny_unauthorized`` is true, this option is ignored.
-    Note: redirecting works fine in tests, but not in a real browser... (TODO).
 
 ``memberdata_to_header``:
     Mapping from memberdata property to request header, one per row.

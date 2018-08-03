@@ -122,9 +122,7 @@ class HeaderPlugin(BasePlugin):
             return True
         if self.redirect_url:
             logger.debug('Redirecting to %s', self.redirect_url)
-            # TODO This works fine in tests, but in a real browser
-            # this results in an Unauthorized error.
-            response.redirect(self.redirect_url)
+            response.redirect(self.redirect_url, lock=1)
             return True
         # We have no redirect_url, so we do not know how to challenge.
         # Let Plone handle this in the default way, probably showing
