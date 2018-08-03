@@ -1,4 +1,5 @@
 graft src/pas
 graft docs
 include *.rst
+include LICENSE.GPL
 global-exclude *.pyc
