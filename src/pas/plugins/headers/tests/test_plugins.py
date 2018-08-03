@@ -17,6 +17,10 @@ class HeaderRequest(TestRequest):
             self.headers = {}
         self.headers[key] = value
 
+    def removeHeader(self, key):
+        if key in self.headers:
+            del self.headers[key]
+
     def getHeader(self, key, default=None):
         if self.headers is None:
             return default
@@ -141,6 +145,12 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(auth_header, 'maurits')
         self.assertEqual(
             plugin.getRolesForPrincipal(user, request), ['student'])
+        # Try an empty roles header.
+        request.addHeader(roles_header, '')
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
+        # Try missing roles header.
+        request.removeHeader(roles_header)
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
         # White space is stripped, case is kept by default.
         request.addHeader(roles_header, '  STUDENT    ')
         self.assertEqual(
@@ -164,6 +174,9 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(
             plugin.getRolesForPrincipal(user, request),
             ['One', 'THRee'])
+        # If we unset the roles_header, no roles are found.
+        plugin.roles_header = ''
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
 
     def test_parse_memberdata_to_header(self):
         plugin = self._makeOne()
@@ -332,10 +345,10 @@ class HeaderPluginUnitTests(unittest.TestCase):
         plugin.userid_header = auth_header
         request = HeaderRequest()
         self.assertEqual(plugin.extractCredentials(request),
-                         {'request_id': None})
+                         {'user_id': None})
         request.addHeader(auth_header, 'my uid')
         self.assertEqual(plugin.extractCredentials(request),
-                         {'request_id': 'my uid'})
+                         {'user_id': 'my uid'})
 
         # Now test with required_headers
         plugin.required_headers = ('HEADER1', 'HEADER2')
@@ -344,7 +357,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(plugin.extractCredentials(request), {})
         request.addHeader('HEADER2', '')
         self.assertEqual(plugin.extractCredentials(request),
-                         {'request_id': 'my uid'})
+                         {'user_id': 'my uid'})
 
     def test_authenticateCredentials(self):
         from pas.plugins.headers.plugins import HeaderPlugin
@@ -352,10 +365,16 @@ class HeaderPluginUnitTests(unittest.TestCase):
         plugin.id = 'my_plugin'
         self.assertIsNone(plugin.authenticateCredentials({}))
         self.assertIsNone(plugin.authenticateCredentials({
-            'request_id': '123'
+            'user_id': '123'
+        }))
+        self.assertIsNone(plugin.authenticateCredentials({
+            'extractor': 'my_plugin'
+        }))
+        self.assertIsNone(plugin.authenticateCredentials({
+            'user_id': '', 'extractor': 'my_plugin'
         }))
         self.assertEqual(plugin.authenticateCredentials({
-            'request_id': '123', 'extractor': 'my_plugin'
+            'user_id': '123', 'extractor': 'my_plugin'
         }), ('123', '123'))
 
     def test_getPropertiesForUser(self):

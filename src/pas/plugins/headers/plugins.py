@@ -143,7 +143,7 @@ class HeaderPlugin(BasePlugin):
         for header in self.required_headers:
             if request.getHeader(header, _MARKER) is _MARKER:
                 return creds
-        creds['request_id'] = self._get_userid(request)
+        creds['user_id'] = self._get_userid(request)
         return creds
 
     def authenticateCredentials(self, credentials):
@@ -161,10 +161,10 @@ class HeaderPlugin(BasePlugin):
         # Check if the credentials are from our own plugin.
         if credentials.get('extractor') != self.getId():
             return
-        request_id = credentials.get('request_id')
-        if not request_id:
+        user_id = credentials.get('user_id')
+        if not user_id:
             return
-        return (request_id, request_id)
+        return (user_id, user_id)
 
     def getPropertiesForUser(self, user, request=None):
         """ user -> {...}
@@ -204,7 +204,6 @@ class HeaderPlugin(BasePlugin):
         o Return a sequence of role names which the principal has.
 
         o May assign roles based on values in the REQUEST object, if present.
-
 
         This is NOT about the roles of the current user,
         but it can be any user.
