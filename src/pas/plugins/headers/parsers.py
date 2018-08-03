@@ -38,6 +38,12 @@ def _upper(value):
     return value.upper()
 
 
+def _split(value):
+    if not isinstance(value, basestring):
+        return []
+    return value.split()
+
+
 # List of parsers.  Internal.  Do not import this.
 _parsers = {}
 
@@ -66,3 +72,4 @@ register_parser('bool', _boolean)
 register_parser('int', _int)
 register_parser('lower', _lower)
 register_parser('upper', _upper)
+register_parser('split', _split)

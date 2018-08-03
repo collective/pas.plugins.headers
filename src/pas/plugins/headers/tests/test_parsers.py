@@ -77,6 +77,21 @@ class ParsersUnitTests(unittest.TestCase):
         self.assertEqual(_upper('ONE  two\n THRee'), 'ONE  TWO\n THREE')
         self.assertEqual(_upper('42'), '42')
 
+    def test_split(self):
+        from pas.plugins.headers.parsers import _split
+        self.assertEqual(_split(None), [])
+        self.assertEqual(_split(0), [])
+        self.assertEqual(_split(1), [])
+        self.assertEqual(_split(object()), [])
+        self.assertEqual(_split(''), [])
+        self.assertEqual(_split('    '), [])
+        self.assertEqual(_split('no'), ['no'])
+        self.assertEqual(_split('No'), ['No'])
+        self.assertEqual(_split('NO'), ['NO'])
+        self.assertEqual(_split('  \n\t\r  NO   '), ['NO'])
+        self.assertEqual(_split('ONE  two\n THRee'), ['ONE', 'two', 'THRee'])
+        self.assertEqual(_split('42'), ['42'])
+
     def test_parse(self):
         from pas.plugins.headers.parsers import parse
         self.assertEqual(parse(None, 'Value'), 'Value')
@@ -84,16 +99,25 @@ class ParsersUnitTests(unittest.TestCase):
         self.assertEqual(parse('int', 'Value'), 0)
         self.assertEqual(parse('lower', 'Value'), 'value')
         self.assertEqual(parse('upper', 'Value'), 'VALUE')
+        self.assertEqual(parse('split', 'Value'), ['Value'])
 
         self.assertEqual(parse('bool', 'y'), True)
         self.assertEqual(parse('int', 'y'), 0)
         self.assertEqual(parse('lower', 'y'), 'y')
         self.assertEqual(parse('upper', 'y'), 'Y')
+        self.assertEqual(parse('split', 'y'), ['y'])
 
         self.assertEqual(parse('bool', '1'), True)
         self.assertEqual(parse('int', '1'), 1)
         self.assertEqual(parse('lower', '1'), '1')
         self.assertEqual(parse('upper', '1'), '1')
+        self.assertEqual(parse('split', '1'), ['1'])
+
+        self.assertEqual(parse('bool', 'AB CD'), False)
+        self.assertEqual(parse('int', 'AB CD'), 0)
+        self.assertEqual(parse('lower', 'AB CD'), 'ab cd')
+        self.assertEqual(parse('upper', 'AB CD'), 'AB CD')
+        self.assertEqual(parse('split', 'AB CD'), ['AB', 'CD'])
 
         # Test a corner case of the parse function:
         # catch some errors in parsers.

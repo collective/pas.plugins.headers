@@ -277,6 +277,21 @@ class HeaderPluginUnitTests(unittest.TestCase):
              'uid': 'my uid',
              })
 
+        # Whitespace within a header is kept.
+        # If you want a list in your data, you can use the 'split' parser.
+        request.addHeader('test', 'one two')
+        plugin.memberdata_to_header = (
+            'a|test',
+            'b|test|split',
+        )
+        self.assertEqual(
+            plugin._get_all_header_properties(request),
+            {
+                'a': 'one two',
+                'b': ['one', 'two'],
+            }
+        )
+
     def test_no_challenge(self):
         # By default we do not challenge, because we do not know how.
         # Prepare the plugin.
