@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.0.0a2 (unreleased)
+1.0.0a2 (2018-08-03)
 --------------------
 
 - Documented our ``GenericSetup`` import step.
