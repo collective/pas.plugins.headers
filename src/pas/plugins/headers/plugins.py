@@ -21,24 +21,6 @@ ROLES = [
     'docent',
     'leerling',
 ]
-# Mapping from Plone memberdata property ids to request header ids.
-PROPS = {
-    'uid': 'EA_PROFILE_uid',
-    'voornaam': 'EA_PROFILE_firstname',
-    'tussenvoegsel': 'EA_PROFILE_middlename',
-    'achternaam': 'EA_PROFILE_lastname',
-    'schoolbrin': 'EA_PROFILE_schoolbrin',
-    'rol': 'EA_PROFILE_role',
-    # We do not need this.
-    # 'email': 'EA_PROFILE_email',
-}
-# Property ids that are only needed temporarily.
-# They are used to get the fullname.
-TEMP_PROPS = [
-    'voornaam',
-    'tussenvoegsel',
-    'achternaam',
-]
 # Marker value for missing headers
 _MARKER = object()
 
