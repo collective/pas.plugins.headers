@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # Define parsers for header values.
+import logging
 
 
+logger = logging.getLogger(__name__)
 # yes, ja, true
 _true_chars = 'y j t 1'.split()
 
@@ -49,7 +51,8 @@ _parsers = {}
 
 
 def register_parser(name, fun):
-    # Note: this does not warn when overriding a parser.
+    if name in _parsers:
+        logger.warning('Overriding parser "%s".', name)
     _parsers[name] = fun
 
 

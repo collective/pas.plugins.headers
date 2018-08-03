@@ -95,8 +95,54 @@ These are the properties that you can edit:
 ``memberdata_to_header``:
     Mapping from memberdata property to request header, one per row.
     Format: ``propname|header``.
+    Or: ``propname|header|parser``.
+    See the Parsers_ section for information about parsers
     You can also combine several headers:
     ``propname|header_with_firstname header_with_lastname``.
+
+
+Parsers
+-------
+
+In the ``memberdata_to_header`` property, you can use parsers.
+For example::
+
+    age|HEADER_age|int
+
+When getting the properties for the current user, the properties plugin will calculate the ``age`` property.
+It reads the ``HEADER_age`` header, which may give a string like ``'42'``.
+It then calls the ``int`` parser to turn this into integer ``42``.
+
+If you specify a parser that does not exist, the parser is ignored and you get the unmodified header value.
+
+A few basic parsers are available:
+
+``bool``:
+    Returns either True or False.
+    When the first character of the lowercase header value is ``y/j/t/1``, the parser return True, else False.
+
+``int``:
+    Returns an integer.
+    When parsing as integer fails, it returns zero.
+
+``lower``:
+    Returns the value in lowercase.
+
+``upper``:
+    Returns the value in uppercase.
+
+``split``:
+    Splits the value on whitespace, so you get a list.
+
+You can register an own parser::
+
+    def extra_parser(value):
+        return value + ' extra'
+
+    from pas.plugins.headers.parsers import register_parser
+    register_parser('extra', extra_parser)
+
+Note: you get a warning when you override an existing parser.
 
 
 Contribute
