@@ -6,6 +6,7 @@ from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlug
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 from Products.PluggableAuthService.interfaces.plugins import IPropertiesPlugin
+from Products.PluggableAuthService.interfaces.plugins import IRolesPlugin
 from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from Products.PluggableAuthService.utils import classImplements
 
@@ -13,14 +14,6 @@ import logging
 
 
 logger = logging.getLogger(__name__)
-
-# This header contains the role.
-ROLE_HEADER = 'EA_PROFILE_role'
-# Roles that we can handle:
-ROLES = [
-    'docent',
-    'leerling',
-]
 # Marker value for missing headers
 _MARKER = object()
 
@@ -68,21 +61,6 @@ def combine_values(values):
     return full.encode('utf-8')
 
 
-def get_header_role(request):
-    """Get role property from the request headers."""
-    if request is None:
-        return
-    role = request.getHeader(ROLE_HEADER)
-    if role is None:
-        return
-    # For one leerling we get role Leerling with capital letter.
-    role = role.strip().lower()
-    if role not in ROLES:
-        logger.error('Unknown role in header: %s', role)
-        return
-    return role
-
-
 class HeaderPlugin(BasePlugin):
     """PAS Plugin which use information from request headers.
 
@@ -95,6 +73,8 @@ class HeaderPlugin(BasePlugin):
     security = ClassSecurityInfo()
 
     userid_header = ''
+    roles_header = ''
+    allowed_roles = ()
     required_headers = ()
     deny_unauthorized = False
     redirect_url = ''
@@ -102,8 +82,12 @@ class HeaderPlugin(BasePlugin):
     _properties = (
         dict(id='userid_header', type='string', mode='w',
              label='Header to use as user id'),
+        dict(id='roles_header', type='string', mode='w',
+             label='Header to use as roles'),
+        dict(id='allowed_roles', type='lines', mode='w',
+             label='Allowed roles'),
         dict(id='required_headers', type='lines', mode='w',
-             label='Required headers.',
+             label='Required headers',
              # Note: description is currently not shown anywhere in the ZMI.
              description='Without these, the plugin does not authenticate.',
              ),
@@ -160,7 +144,6 @@ class HeaderPlugin(BasePlugin):
             if request.getHeader(header, _MARKER) is _MARKER:
                 return creds
         creds['request_id'] = self._get_userid(request)
-        creds['role'] = get_header_role(request)
         return creds
 
     def authenticateCredentials(self, credentials):
@@ -179,8 +162,7 @@ class HeaderPlugin(BasePlugin):
         if credentials.get('extractor') != self.getId():
             return
         request_id = credentials.get('request_id')
-        role = credentials.get('role')
-        if not (request_id and role):
+        if not request_id:
             return
         return (request_id, request_id)
 
@@ -213,6 +195,51 @@ class HeaderPlugin(BasePlugin):
         if self._get_userid(request) != user_id:
             return
         return self._get_all_header_properties(request)
+
+    def getRolesForPrincipal(self, principal, request=None):
+        """ principal -> ( role_1, ... role_N )
+
+        For IRolesPlugin.
+
+        o Return a sequence of role names which the principal has.
+
+        o May assign roles based on values in the REQUEST object, if present.
+
+
+        This is NOT about the roles of the current user,
+        but it can be any user.
+        If it *is* the current user, we can get the info from the
+        request headers.
+        """
+        result = []
+        if request is None:
+            return result
+        if not self.roles_header:
+            return result
+        user_id = principal.getUserId()
+        if self._get_userid(request) != user_id:
+            return result
+        roles = request.getHeader(self.roles_header)
+        if not roles:
+            return result
+        roles = roles.split()
+        if not self.allowed_roles:
+            return roles
+        # Check roles against the allowed roles.
+        # Compare them lowercase.
+        # In the result we should only have the spelling from allowed_roles.
+        # So prepare a dictionary with keys 'lowercase' and values 'original'.
+        allowed_roles = {
+            role.lower(): role for role in self.allowed_roles
+        }
+        for role in roles:
+            canonical_role = allowed_roles.get(role.lower())
+            if not canonical_role:
+                # SAML may give five roles, out of which Plone uses only two.
+                logger.debug('Ignoring disallowed role in header: %s', role)
+                continue
+            result.append(canonical_role)
+        return result
 
     def _get_userid(self, request):
         """Get userid property from the request headers."""
@@ -279,6 +306,7 @@ classImplements(
     IAuthenticationPlugin,
     IChallengePlugin,
     IPropertiesPlugin,
+    IRolesPlugin,
 )
 
 

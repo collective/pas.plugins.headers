@@ -50,10 +50,12 @@ class ExportImportBaseTestCase(unittest.TestCase):
 
     def _configurePlugin(self):
         """Give the plugin some data."""
+        self.plugin.allowed_roles = ('root',)
         self.plugin.deny_unauthorized = True
         self.plugin.memberdata_to_header = ('foo|bar',)
         self.plugin.redirect_url = 'https://example.org'
         self.plugin.required_headers = ('foo',)
+        self.plugin.roles_header = 'humbug'
         self.plugin.userid_header = 'foo'
 
     def _removePlugin(self):
@@ -65,15 +67,21 @@ class ExportImportBaseTestCase(unittest.TestCase):
 
     def assert_plugin_has_test_settings(self):
         """Assert that the plugin has the settings from _configurePlugin."""
+        self.assertTupleEqual(self.plugin.allowed_roles, ('root',))
         self.assertTrue(self.plugin.deny_unauthorized)
         self.assertTupleEqual(self.plugin.memberdata_to_header, ('foo|bar',))
         self.assertEqual(self.plugin.redirect_url, 'https://example.org')
         self.assertTupleEqual(self.plugin.required_headers, ('foo',))
+        self.assertEqual(self.plugin.roles_header, 'humbug')
         self.assertEqual(self.plugin.userid_header, 'foo')
 
     def assert_plugin_has_default_settings(self):
         """Assert that the plugin has the default settings."""
         from pas.plugins.headers.plugins import HeaderPlugin
+        self.assertTupleEqual(
+            self.plugin.allowed_roles,
+            HeaderPlugin.allowed_roles,
+        )
         self.assertEqual(
             self.plugin.deny_unauthorized,
             HeaderPlugin.deny_unauthorized,
@@ -91,6 +99,10 @@ class ExportImportBaseTestCase(unittest.TestCase):
             HeaderPlugin.required_headers,
         )
         self.assertEqual(
+            self.plugin.roles_header,
+            HeaderPlugin.roles_header,
+        )
+        self.assertEqual(
             self.plugin.userid_header,
             HeaderPlugin.userid_header,
         )
@@ -102,6 +114,13 @@ class TestImport(ExportImportBaseTestCase):
     def test_import_step_in_profile(self):
         from plone.app.testing import applyProfile
         applyProfile(self.portal, 'pas.plugins.headers.tests:test')
+        self.assertTupleEqual(
+            self.plugin.allowed_roles,
+            (
+                'Member',
+                'Zebra',
+            ),
+        )
         self.assertTrue(self.plugin.deny_unauthorized)
         self.assertTupleEqual(
             self.plugin.memberdata_to_header,
@@ -113,6 +132,7 @@ class TestImport(ExportImportBaseTestCase):
         self.assertEqual(
             self.plugin.redirect_url, 'https://maurits.vanrees.org')
         self.assertTupleEqual(self.plugin.required_headers, ('uid', 'test'))
+        self.assertEqual(self.plugin.roles_header, 'roles')
         self.assertEqual(self.plugin.userid_header, 'uid')
 
     def test_import_no_file(self):
@@ -129,6 +149,7 @@ class TestImport(ExportImportBaseTestCase):
         """Test a full import."""
         from pas.plugins.headers.exportimport import import_properties
         settings = {
+            'allowed_roles': ['missile', 'target'],
             'deny_unauthorized': True,
             'memberdata_to_header': [
                 'uid|PROFILE_uid',
@@ -140,9 +161,14 @@ class TestImport(ExportImportBaseTestCase):
                 'uid',
                 'role'
             ],
+            'roles_header': 'portal_roles',
             'userid_header': 'uid'
         }
         import_properties(self._makeContext(json.dumps(settings)))
+        self.assertTupleEqual(
+            self.plugin.allowed_roles,
+            ('missile', 'target'),
+        )
         self.assertTrue(self.plugin.deny_unauthorized)
         self.assertTupleEqual(
             self.plugin.memberdata_to_header,
@@ -158,18 +184,22 @@ class TestImport(ExportImportBaseTestCase):
             self.plugin.required_headers,
             ('uid', 'role'),
         )
+        self.assertEqual(self.plugin.roles_header, 'portal_roles')
         self.assertEqual(self.plugin.userid_header, 'uid')
 
         # Explicitly test the types.
         # We want string, not unicode: when you save the properties form
         # in the ZMI, you always get a string.
         # And we want tuples, not lists.
+        self.assertIsInstance(self.plugin.allowed_roles, tuple)
+        self.assertIsInstance(self.plugin.allowed_roles[0], str)
         self.assertIsInstance(self.plugin.deny_unauthorized, bool)
         self.assertIsInstance(self.plugin.memberdata_to_header, tuple)
         self.assertIsInstance(self.plugin.memberdata_to_header[0], str)
         self.assertIsInstance(self.plugin.redirect_url, str)
         self.assertIsInstance(self.plugin.required_headers, tuple)
         self.assertIsInstance(self.plugin.required_headers[0], str)
+        self.assertIsInstance(self.plugin.roles_header, str)
         self.assertIsInstance(self.plugin.userid_header, str)
 
     def test_import_purge_false(self):
@@ -260,20 +290,24 @@ class TestExport(ExportImportBaseTestCase):
             '\n'.join([line.strip() for line in
                        context.get_exported_data().splitlines()]),
             """{
+"allowed_roles": [],
 "deny_unauthorized": false,
 "memberdata_to_header": [],
 "redirect_url": "",
 "required_headers": [],
+"roles_header": "",
 "userid_header": ""
 }""",
         )
         self.assertDictEqual(
             json.loads(context.get_exported_data()),
             {
+                'allowed_roles': [],
                 'deny_unauthorized': False,
                 'memberdata_to_header': [],
                 'redirect_url': '',
                 'required_headers': [],
+                'roles_header': '',
                 'userid_header': '',
             },
         )
@@ -287,10 +321,12 @@ class TestExport(ExportImportBaseTestCase):
         self.assertDictEqual(
             json.loads(context.get_exported_data()),
             {
+                'allowed_roles': ['root'],
                 'deny_unauthorized': True,
                 'memberdata_to_header': ['foo|bar'],
                 'redirect_url': 'https://example.org',
                 'required_headers': ['foo'],
+                'roles_header': 'humbug',
                 'userid_header': 'foo',
             },
         )

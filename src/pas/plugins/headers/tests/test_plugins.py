@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from pas.plugins.headers.plugins import ROLE_HEADER
 from StringIO import StringIO
 from zope.publisher.browser import TestRequest
 from ZPublisher.HTTPResponse import HTTPResponse
@@ -42,8 +41,8 @@ class HeaderPluginUnitTests(unittest.TestCase):
         plugin.userid_header = 'EA_PROFILE_uid'
         plugin.required_headers = ('EA_PROFILE_uid', 'EA_PROFILE_role')
         plugin.deny_unauthorized = True
-        # plugin.role_header = 'EA_PROFILE_role'
-        # plugin.allowed_roles = ['docent', 'leerling']
+        plugin.roles_header = 'EA_PROFILE_role'
+        plugin.allowed_roles = ('docent', 'leerling')
         plugin.memberdata_to_header = (
             'uid|EA_PROFILE_uid',
             'fullname|EA_PROFILE_firstname '
@@ -121,23 +120,50 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request = HeaderRequest()
         self.assertEqual(plugin._get_userid(request), None)
 
-    def test_get_header_role(self):
-        from pas.plugins.headers.plugins import get_header_role
-        self.assertEqual(get_header_role(None), None)
+    def test_getRolesForPrincipal(self):
+        from pas.plugins.headers.plugins import HeaderPlugin
+        plugin = HeaderPlugin()
+        auth_header = 'SAML_ID'
+        roles_header = 'SAML_roles'
+        plugin.userid_header = auth_header
+        plugin.roles_header = roles_header
+        user = DummyUser('maurits')
+        self.assertEqual(plugin.getRolesForPrincipal(user, None), [])
         request = HeaderRequest()
-        self.assertEqual(get_header_role(request), None)
-        request.addHeader(ROLE_HEADER, 'foo')
-        self.assertEqual(get_header_role(request), None)
-        # Only two values are accepted.
-        request.addHeader(ROLE_HEADER, 'docent')
-        self.assertEqual(get_header_role(request), 'docent')
-        request.addHeader(ROLE_HEADER, 'leerling')
-        self.assertEqual(get_header_role(request), 'leerling')
-        # Well, we may accept capitalised values.
-        request.addHeader(ROLE_HEADER, 'Leerling')
-        self.assertEqual(get_header_role(request), 'leerling')
-        request.addHeader(ROLE_HEADER, 'LEERLING    ')
-        self.assertEqual(get_header_role(request), 'leerling')
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
+        # We need a roles header.
+        request.addHeader(roles_header, 'student')
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
+        # We need an auth header.
+        request.addHeader(auth_header, 'pipo')
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
+        # The auth header needs to be for the current user.
+        request.addHeader(auth_header, 'maurits')
+        self.assertEqual(
+            plugin.getRolesForPrincipal(user, request), ['student'])
+        # White space is stripped, case is kept by default.
+        request.addHeader(roles_header, '  STUDENT    ')
+        self.assertEqual(
+            plugin.getRolesForPrincipal(user, request), ['STUDENT'])
+        # Multiple roles can be set.
+        request.addHeader(roles_header, '  one two three   ')
+        self.assertEqual(
+            plugin.getRolesForPrincipal(user, request),
+            ['one', 'two', 'three'])
+        # We can restrict the roles that we take over.
+        plugin.allowed_roles = ('one', 'three')
+        self.assertEqual(
+            plugin.getRolesForPrincipal(user, request),
+            ['one', 'three'])
+        # Case is kept from these canonical roles.
+        request.addHeader(roles_header, 'ONE Two Three')
+        self.assertEqual(
+            plugin.getRolesForPrincipal(user, request),
+            ['one', 'three'])
+        plugin.allowed_roles = ('One', 'THRee')
+        self.assertEqual(
+            plugin.getRolesForPrincipal(user, request),
+            ['One', 'THRee'])
 
     def test_parse_memberdata_to_header(self):
         plugin = self._makeOne()
@@ -206,6 +232,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
     def test_get_all_header_properties(self):
         plugin = self._makeOne()
         auth_header = plugin.userid_header
+        roles_header = plugin.roles_header
         self.assertEqual(plugin._get_all_header_properties(None), {})
         request = HeaderRequest()
         self.assertEqual(
@@ -228,7 +255,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader('EA_PROFILE_lastname', 'Rees')
         request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
         request.addHeader(auth_header, 'my uid')
-        request.addHeader(ROLE_HEADER, 'docent')
+        request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin._get_all_header_properties(request),
             {'fullname': 'Maurits van Rees',
@@ -305,19 +332,10 @@ class HeaderPluginUnitTests(unittest.TestCase):
         plugin.userid_header = auth_header
         request = HeaderRequest()
         self.assertEqual(plugin.extractCredentials(request),
-                         {'role': None, 'request_id': None})
+                         {'request_id': None})
         request.addHeader(auth_header, 'my uid')
         self.assertEqual(plugin.extractCredentials(request),
-                         {'role': None, 'request_id': 'my uid'})
-        request.addHeader(ROLE_HEADER, 'pupil')
-        self.assertEqual(plugin.extractCredentials(request),
-                         {'role': None, 'request_id': 'my uid'})
-        request.addHeader(ROLE_HEADER, 'leerling')
-        self.assertEqual(plugin.extractCredentials(request),
-                         {'role': 'leerling', 'request_id': 'my uid'})
-        request.addHeader(ROLE_HEADER, 'Leerling   ')
-        self.assertEqual(plugin.extractCredentials(request),
-                         {'role': 'leerling', 'request_id': 'my uid'})
+                         {'request_id': 'my uid'})
 
         # Now test with required_headers
         plugin.required_headers = ('HEADER1', 'HEADER2')
@@ -326,7 +344,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(plugin.extractCredentials(request), {})
         request.addHeader('HEADER2', '')
         self.assertEqual(plugin.extractCredentials(request),
-                         {'role': 'leerling', 'request_id': 'my uid'})
+                         {'request_id': 'my uid'})
 
     def test_authenticateCredentials(self):
         from pas.plugins.headers.plugins import HeaderPlugin
@@ -334,23 +352,18 @@ class HeaderPluginUnitTests(unittest.TestCase):
         plugin.id = 'my_plugin'
         self.assertIsNone(plugin.authenticateCredentials({}))
         self.assertIsNone(plugin.authenticateCredentials({
-            'role': 'leerling', 'request_id': '123'
+            'request_id': '123'
         }))
         self.assertEqual(plugin.authenticateCredentials({
-            'role': 'leerling', 'request_id': '123', 'extractor': 'my_plugin'
-        }), ('123', '123'))
-        self.assertIsNone(plugin.authenticateCredentials({
             'request_id': '123', 'extractor': 'my_plugin'
-        }))
-        self.assertIsNone(plugin.authenticateCredentials({
-            'role': 'leerling', 'extractor': 'my_plugin'
-        }))
+        }), ('123', '123'))
 
     def test_getPropertiesForUser(self):
         # from pas.plugins.headers.plugins import HeaderPlugin
         # plugin = HeaderPlugin()
         plugin = self._makeOne()
         auth_header = plugin.userid_header
+        roles_header = plugin.roles_header
         user = DummyUser('maurits')
         self.assertIsNone(plugin.getPropertiesForUser(user))
         request = HeaderRequest()
@@ -369,14 +382,14 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader('EA_PROFILE_middlename', 'van')
         request.addHeader('EA_PROFILE_lastname', 'Rees')
         request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
-        request.addHeader(ROLE_HEADER, 'docent')
+        request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
             {'fullname': 'Maurits van Rees',
              'rol': 'docent',
              'schoolbrin': 'AA44ZT',
              'uid': 'maurits'})
-        request.addHeader(ROLE_HEADER, '  LEERling  \t ')
+        request.addHeader(roles_header, '  LEERling  \t ')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
             {'fullname': 'Maurits van Rees',

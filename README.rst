@@ -20,6 +20,7 @@ It is registered for several plugin types:
 - Extraction plugin
 - Authentication plugin
 - Properties plugin
+- Roles plugin
 
 You can configure them in the ZMI (Zope Management Interface) by editing properties in the plugin.
 
@@ -60,6 +61,19 @@ These are the properties that you can edit:
 
 ``userid_header``:
     Header to use as user id.
+
+``roles_header``:
+    Header to use as roles for the current user.
+    This can give multiple roles: it is split on white space.
+
+``allowed_roles``:
+    Allowed roles.
+    Roles that we allow in the ``roles_header``.
+    Any other roles that are in the header are ignored.
+    Ignored when empty: all roles are taken over, also when the role is not known in Plone.
+    The roles from the header and the ``allowed_roles`` property are compared lowercase.
+    The reported roles use the case from``allowed_roles``.
+    For example, if the header contains ``PUPIL root`` and ``allowed_roles`` contains ``Pupil Teacher``, then the reported roles will be only ``Pupil``.
 
 ``required_headers``:
     Required headers.

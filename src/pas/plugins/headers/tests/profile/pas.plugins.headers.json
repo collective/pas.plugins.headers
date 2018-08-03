@@ -1,5 +1,9 @@
 {
     "purge": true,
+    "allowed_roles": [
+        "Member",
+        "Zebra"
+    ],
     "deny_unauthorized": true,
     "memberdata_to_header": [
         "uid|HEADER_uid|lower",
@@ -10,5 +14,6 @@
         "uid",
         "test"
     ],
+    "roles_header": "roles",
     "userid_header": "uid"
 }
