@@ -49,8 +49,8 @@ I would like this to work in plain Zope, but I haven't tested this yet.
 You at least need to install ``Products.PluggableAuthService`` and ``Products.GenericSetup`` before you can begin to use this plugin.
 
 
-Configuration
--------------
+Manual configuration
+--------------------
 
 You can configure the plugin by going to the ZMI (Zope Management Interface).
 Go to the ``acl_users`` (``PluggableAuthService``) folder in the Plone ZMI.
@@ -101,6 +101,54 @@ These are the properties that you can edit:
     ``propname|header_with_firstname header_with_lastname``.
 
 
+Configuration via GenericSetup
+------------------------------
+
+The package has a GS (``GenericSetup``) import step with id ``pas.plugins.headers``.
+In the GS profile of your add-on, it looks for a file with name ``pas.plugins.headers.json``.
+This file must contain a json string.
+Full example:
+
+::
+
+    {
+        "purge": true,
+        "allowed_roles": [
+            "Member",
+            "Zebra"
+        ],
+        "deny_unauthorized": true,
+        "memberdata_to_header": [
+            "uid|HEADER_uid|lower",
+            "fullname|HEADER_firstname HEADER_lastname"
+        ],
+        "redirect_url": "https://maurits.vanrees.org",
+        "required_headers": [
+            "uid",
+            "test"
+        ],
+        "roles_header": "roles",
+        "userid_header": "uid"
+    }
+
+Some remarks:
+
+- When the contents cannot be parsed as json, or when the result is not a dictionary, a ``ValueError`` is raised.
+
+- ``purge`` is optional.  When it is true, the default settings are restored before handling the rest of the file.
+
+- ``purge`` is only valid for the entire file.
+  It does not work in individual lists.
+  So you cannot add one required header and keep the current ones.
+  You need to specify them all.
+
+- The keys are the properties that you see in the ZMI.
+
+- When an unknown key is used, it is silently ignored.
+
+- In ``memberdata_to_header``, the importer does not check if the parsers are registered.
+
+
 Parsers
 -------
 
@@ -112,6 +160,9 @@ For example::
 When getting the properties for the current user, the properties plugin will calculate the ``age`` property.
 It reads the ``HEADER_age`` header, which may give a string like ``'42'``.
 It then calls the ``int`` parser to turn this into integer ``42``.
+
+Note: the properties plugin is currently the only part where the parsers are used.
+So it is not used when getting for example the user id from a header.
 
 If you specify a parser that does not exist, the parser is ignored and you get the unmodified header value.
 
