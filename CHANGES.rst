@@ -5,7 +5,7 @@ Changelog
 1.0.0a3 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Make final release, no changes.  [maurits]
 
 
 1.0.0a2 (2018-08-03)
