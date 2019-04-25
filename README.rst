@@ -42,11 +42,18 @@ and then running ``bin/buildout``.
 Start Plone and install the plugin in the Add-ons control panel.
 
 
+Compatibility
+-------------
+
+This has been tested to work on Plone 4.3 and 5.1.
+
+
 Plain Zope?
 -----------
 
-I would like this to work in plain Zope, but I haven't tested this yet.
-You at least need to install ``Products.PluggableAuthService`` and ``Products.GenericSetup`` before you can begin to use this plugin.
+No, this does not work in plain Zope.
+Theoretically it might work if you first install ``Products.PluggableAuthService`` and ``Products.GenericSetup``.
+But then you already almost have a ``CMF`` site.
 
 
 Manual configuration
