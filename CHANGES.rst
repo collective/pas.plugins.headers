@@ -2,8 +2,8 @@ Changelog
 =========
 
 
-1.0.0a3 (unreleased)
---------------------
+1.0.0 (2019-04-25)
+------------------
 
 - Make final release, no changes.  [maurits]
 
