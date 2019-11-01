@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.0.1 (unreleased)
+1.0.1 (2019-11-01)
 ------------------
 
 - Replaced import of ``Globals``, which is gone in Plone 5.2.  [maurits]
