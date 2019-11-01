@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .parsers import parse
 from AccessControl import ClassSecurityInfo
-from Globals import InitializeClass
+from AccessControl.class_init import InitializeClass
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin  # noqa
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
