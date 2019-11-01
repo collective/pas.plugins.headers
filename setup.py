@@ -19,6 +19,7 @@ setup(
     long_description=long_description,
     # Get more from https://pypi.org/classifiers/
     classifiers=[
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
         "Framework :: Plone",
         "Framework :: Plone :: 4.3",
@@ -31,7 +32,7 @@ setup(
     keywords='Python Plone Zope PAS acl_users SAML',
     author='Maurits van Rees',
     author_email='m.van.rees@zestsoftware.nl',
-    url='https://pypi.org/project/pas.plugins.headers',
+    url='https://github.com/collective/pas.plugins.headers',
     license='GPL version 2',
     packages=find_packages('src', exclude=['ez_setup']),
     namespace_packages=['pas', 'pas.plugins'],
