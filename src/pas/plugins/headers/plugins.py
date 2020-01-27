@@ -11,6 +11,7 @@ from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from Products.PluggableAuthService.utils import classImplements
 
 import logging
+import six
 
 
 logger = logging.getLogger(__name__)
@@ -25,9 +26,9 @@ def decode_header(value):
     Firefox plugin gives me latin-1.
     The same might be true for the live server.
     """
-    if not isinstance(value, basestring):
+    if not isinstance(value, six.string_types):
         return value
-    if isinstance(value, unicode):
+    if isinstance(value, six.text_type):
         return value
     try:
         return value.decode('utf-8')

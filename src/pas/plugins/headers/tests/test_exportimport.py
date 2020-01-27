@@ -4,6 +4,7 @@ from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING 
 from pas.plugins.headers.utils import get_plugin
 
 import json
+import six
 import unittest
 
 
@@ -192,15 +193,15 @@ class TestImport(ExportImportBaseTestCase):
         # in the ZMI, you always get a string.
         # And we want tuples, not lists.
         self.assertIsInstance(self.plugin.allowed_roles, tuple)
-        self.assertIsInstance(self.plugin.allowed_roles[0], str)
+        self.assertIsInstance(self.plugin.allowed_roles[0], six.binary_type)
         self.assertIsInstance(self.plugin.deny_unauthorized, bool)
         self.assertIsInstance(self.plugin.memberdata_to_header, tuple)
-        self.assertIsInstance(self.plugin.memberdata_to_header[0], str)
-        self.assertIsInstance(self.plugin.redirect_url, str)
+        self.assertIsInstance(self.plugin.memberdata_to_header[0], six.binary_type)
+        self.assertIsInstance(self.plugin.redirect_url, six.binary_type)
         self.assertIsInstance(self.plugin.required_headers, tuple)
-        self.assertIsInstance(self.plugin.required_headers[0], str)
-        self.assertIsInstance(self.plugin.roles_header, str)
-        self.assertIsInstance(self.plugin.userid_header, str)
+        self.assertIsInstance(self.plugin.required_headers[0], six.binary_type)
+        self.assertIsInstance(self.plugin.roles_header, six.binary_type)
+        self.assertIsInstance(self.plugin.userid_header, six.binary_type)
 
     def test_import_purge_false(self):
         """Test purge=false."""
@@ -317,7 +318,7 @@ class TestExport(ExportImportBaseTestCase):
         self._configurePlugin()
         context = self._makeContext()
         export_properties(context)
-        self.assertIsInstance(context.get_exported_data(), str)
+        self.assertIsInstance(context.get_exported_data(), six.binary_type)
         self.assertDictEqual(
             json.loads(context.get_exported_data()),
             {

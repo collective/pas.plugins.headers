@@ -5,7 +5,7 @@ Changelog
 1.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added basic Python 3 compatibility with six.  [maurits]
 
 
 1.0.1 (2019-11-01)

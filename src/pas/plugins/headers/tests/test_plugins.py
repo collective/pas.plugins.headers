@@ -3,6 +3,7 @@ from StringIO import StringIO
 from zope.publisher.browser import TestRequest
 from ZPublisher.HTTPResponse import HTTPResponse
 
+import six
 import unittest
 
 
@@ -61,7 +62,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         from pas.plugins.headers.plugins import decode_header
         self.assertEqual(decode_header(None), None)
         self.assertEqual(decode_header(''), u'')
-        self.assertTrue(isinstance(decode_header(''), unicode))
+        self.assertTrue(isinstance(decode_header(''), six.text_type))
         # u'\xae' is (R)egistered trademark.
         self.assertEqual(decode_header(u'\xae'), u'\xae')  # unicode
         self.assertEqual(decode_header('\xc2\xae'), u'\xae')  # utf-8
@@ -79,7 +80,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
             'Maurits')
         # 'Maurits' == u'Maurits' because both contain only ascii.
         # But we *do* want to know if we get unicode or a string back.
-        self.assertTrue(isinstance(combine_values(['Maurits']), str))
+        self.assertTrue(isinstance(combine_values(['Maurits']), six.binary_type))
         self.assertEqual(
             combine_values(['Maurits', 'Rees']),
             'Maurits Rees')
@@ -99,7 +100,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(
             combine_values([u'Arth\xfcr', u'Dent']),
             'Arth\xc3\xbcr Dent')
-        self.assertTrue(isinstance(combine_values([u'Arth\xfcr']), str))
+        self.assertTrue(isinstance(combine_values([u'Arth\xfcr']), six.binary_type))
         # We can combine more than three.
         self.assertEqual(
             combine_values(['', 'Hello,', 'Maurits', '   ' 'van', 'Rees']),

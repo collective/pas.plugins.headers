@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Define parsers for header values.
 import logging
+import six
 
 
 logger = logging.getLogger(__name__)
@@ -9,7 +10,7 @@ _true_chars = 'y j t 1'.split()
 
 
 def _boolean(value):
-    if not isinstance(value, basestring):
+    if not isinstance(value, six.string_types):
         return bool(value)
     value = value.strip()
     if not value:
@@ -27,21 +28,21 @@ def _int(value):
 
 
 def _lower(value):
-    if not isinstance(value, basestring):
+    if not isinstance(value, six.string_types):
         return ''
     value = value.strip()
     return value.lower()
 
 
 def _upper(value):
-    if not isinstance(value, basestring):
+    if not isinstance(value, six.string_types):
         return ''
     value = value.strip()
     return value.upper()
 
 
 def _split(value):
-    if not isinstance(value, basestring):
+    if not isinstance(value, six.string_types):
         return []
     return value.split()
 
