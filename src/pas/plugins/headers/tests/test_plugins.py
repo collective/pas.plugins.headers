@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from StringIO import StringIO
+from io import BytesIO
 from zope.publisher.browser import TestRequest
 from ZPublisher.HTTPResponse import HTTPResponse
 
@@ -301,7 +301,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Prepare the request.
         request = HeaderRequest()
-        out = StringIO()
+        out = BytesIO()
         response = HTTPResponse(stdout=out)
 
         # When the plugin does not make a challenge, it must not return a
@@ -322,7 +322,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Prepare the request.
         request = HeaderRequest()
-        out = StringIO()
+        out = BytesIO()
         response = HTTPResponse(stdout=out)
 
         # When the plugin makes a challenge, it must return a True value.
@@ -343,7 +343,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Prepare the request.
         request = HeaderRequest()
-        out = StringIO()
+        out = BytesIO()
         response = HTTPResponse(stdout=out)
 
         # When the plugin makes a challenge, it must return a True value.
