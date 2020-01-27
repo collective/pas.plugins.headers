@@ -1,24 +1,12 @@
-language: python
-cache:
-  pip: true
-  directories:
-  - eggs
-  - downloads
-python:
-  - "2.7"
+version: ~> 1.0
+import: collective/buildout.plonetest:travis/default.yml
 matrix:
-  fast_finish: true
-install:
-  - virtualenv -p `which python` .
-  - bin/pip install -r requirements.txt
-  - bin/buildout -N buildout:download-cache=downloads code-analysis:return-status-codes=True annotate
-  - bin/buildout -N buildout:download-cache=downloads code-analysis:return-status-codes=True
-script:
-  - bin/code-analysis
-  - bin/test
-after_success:
-  - bin/createcoverage --output-dir htmlcov
-  - bin/pip install coverage
-  - bin/python -m coverage.pickle2json
-  - pip install coveralls
-  - coveralls
+  include:
+    - python: "2.7"
+      env: PLONE_VERSION="4.3"
+    - python: "2.7"
+      env: PLONE_VERSION="5.1"
+    - python: "2.7"
+      env: PLONE_VERSION="5.2"
+    - python: "3.7"
+      env: PLONE_VERSION="5.2"
