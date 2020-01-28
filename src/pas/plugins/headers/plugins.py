@@ -26,9 +26,7 @@ def decode_header(value):
     Firefox plugin gives me latin-1.
     The same might be true for the live server.
     """
-    if not isinstance(value, six.string_types):
-        return value
-    if isinstance(value, six.text_type):
+    if not isinstance(value, six.binary_type):
         return value
     try:
         return value.decode('utf-8')
@@ -119,7 +117,7 @@ class HeaderPlugin(BasePlugin):
         if self.deny_unauthorized:
             # We do not give the user a change to login.
             response.write(
-                'ERROR: denying any unauthorized access.\n')
+                b'ERROR: denying any unauthorized access.\n')
             return True
         if self.redirect_url:
             logger.debug('Redirecting to %s', self.redirect_url)

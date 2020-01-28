@@ -62,11 +62,12 @@ class HeaderPluginUnitTests(unittest.TestCase):
         from pas.plugins.headers.plugins import decode_header
         self.assertEqual(decode_header(None), None)
         self.assertEqual(decode_header(''), u'')
+        self.assertEqual(decode_header(b''), u'')
         self.assertTrue(isinstance(decode_header(''), six.text_type))
         # u'\xae' is (R)egistered trademark.
         self.assertEqual(decode_header(u'\xae'), u'\xae')  # unicode
-        self.assertEqual(decode_header('\xc2\xae'), u'\xae')  # utf-8
-        self.assertEqual(decode_header('\xae'), u'\xae')  # latin-1
+        self.assertEqual(decode_header(b'\xc2\xae'), u'\xae')  # utf-8
+        self.assertEqual(decode_header(b'\xae'), u'\xae')  # latin-1
 
     def test_combine_values(self):
         from pas.plugins.headers.plugins import combine_values
@@ -311,7 +312,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # Check the response.
         out.seek(0)
         self.assertNotIn(
-            'Fout: Geen authenticatie headers gevonden.',
+            b'Fout: Geen authenticatie headers gevonden.',
             out.read())
 
     def test_challenge_deny(self):
@@ -331,7 +332,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # Check the response.
         out.seek(0)
         self.assertIn(
-            'ERROR: denying any unauthorized access.',
+            b'ERROR: denying any unauthorized access.',
             out.read())
 
     def test_challenge_redirect(self):
