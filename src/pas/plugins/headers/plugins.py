@@ -48,7 +48,7 @@ def combine_values(values):
     returns an encoded string.  So *no* unicode.
     """
     if not isinstance(values, (list, tuple)):
-        return ''
+        return b''
     # filter out empty values.
     values = filter(None, values)
     # Turn values into unicode so we can safely combine them.

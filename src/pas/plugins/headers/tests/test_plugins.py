@@ -71,45 +71,49 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
     def test_combine_values(self):
         from pas.plugins.headers.plugins import combine_values
-        self.assertEqual(combine_values(None), u'')
-        self.assertEqual(combine_values('My name'), u'')
-        self.assertEqual(combine_values({}), u'')
-        self.assertEqual(combine_values([]), u'')
-        self.assertEqual(combine_values(()), u'')
+        self.assertEqual(combine_values(None), b'')
+        self.assertEqual(combine_values('My name'), b'')
+        self.assertEqual(combine_values({}), b'')
+        self.assertEqual(combine_values([]), b'')
+        self.assertEqual(combine_values(()), b'')
         self.assertEqual(combine_values(
-            ['Maurits']),
-            'Maurits')
+            [b'Maurits']),
+            b'Maurits')
+        self.assertEqual(combine_values(
+            [u'Maurits']),
+            b'Maurits')
         # 'Maurits' == u'Maurits' because both contain only ascii.
         # But we *do* want to know if we get unicode or a string back.
+        # Also, on Python 3 they are NOT the same at all.
         self.assertTrue(isinstance(combine_values(['Maurits']), six.binary_type))
         self.assertEqual(
             combine_values(['Maurits', 'Rees']),
-            'Maurits Rees')
+            b'Maurits Rees')
         self.assertEqual(
             combine_values(['Maurits', '', 'Rees']),
-            'Maurits Rees')
+            b'Maurits Rees')
         self.assertEqual(
             combine_values(['Maurits', 'van', 'Rees']),
-            'Maurits van Rees')
+            b'Maurits van Rees')
         self.assertEqual(
             combine_values(['    Maurits\t\n\r  ', '  ', None, '    Rees \n']),
-            'Maurits Rees')
+            b'Maurits Rees')
         self.assertEqual(
             combine_values((u'Arthur', u'Dent')),
-            'Arthur Dent')
+            b'Arthur Dent')
         # In standard Plone we get a string encoded with utf-8.
         self.assertEqual(
             combine_values([u'Arth\xfcr', u'Dent']),
-            'Arth\xc3\xbcr Dent')
+            b'Arth\xc3\xbcr Dent')
         self.assertTrue(isinstance(combine_values([u'Arth\xfcr']), six.binary_type))
         # We can combine more than three.
         self.assertEqual(
             combine_values(['', 'Hello,', 'Maurits', '   ' 'van', 'Rees']),
-            'Hello, Maurits van Rees')
+            b'Hello, Maurits van Rees')
         # And they can be unicode / encoded string / ascii string.
         self.assertEqual(
-            combine_values(['Dent', u'Arth\xfcr', u'Dent', 'Arth\xc3\xbcr']),
-            'Dent Arth\xc3\xbcr Dent Arth\xc3\xbcr')
+            combine_values([b'Dent', u'Arth\xfcr', u'Dent', b'Arth\xc3\xbcr']),
+            b'Dent Arth\xc3\xbcr Dent Arth\xc3\xbcr')
 
     def test_get_userid(self):
         from pas.plugins.headers.plugins import HeaderPlugin
