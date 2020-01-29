@@ -254,22 +254,23 @@ class HeaderPluginUnitTests(unittest.TestCase):
         roles_header = plugin.roles_header
         self.assertEqual(plugin._get_all_header_properties(None), {})
         request = HeaderRequest()
+        plugin._get_all_header_properties(request)
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': '',
-             'rol': '',
-             'schoolbrin': '',
-             'uid': '',
+            {'fullname': b'',
+             'rol': b'',
+             'schoolbrin': b'',
+             'uid': b'',
              })
-        request.addHeader('EA_PROFILE_foo', 'bar')
-        request.addHeader('EA_PROFILE_firstname', 'Maurits')
-        request.addHeader('EA_PROFILE_middlename', 'van')
+        request.addHeader('EA_PROFILE_foo', b'bar')
+        request.addHeader('EA_PROFILE_firstname', b'Maurits')
+        request.addHeader('EA_PROFILE_middlename', b'van')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': 'Maurits van',
-             'rol': '',
-             'schoolbrin': '',
-             'uid': '',
+            {'fullname': b'Maurits van',
+             'rol': b'',
+             'schoolbrin': b'',
+             'uid': b'',
              })
         request.addHeader('EA_PROFILE_lastname', 'Rees')
         request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
@@ -277,10 +278,21 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': 'Maurits van Rees',
+            {'fullname': b'Maurits van Rees',
              'rol': 'docent',
              'schoolbrin': 'AA44ZT',
              'uid': 'my uid',
+             })
+        request.addHeader('EA_PROFILE_lastname', b'Rees')
+        request.addHeader('EA_PROFILE_schoolbrin', b'AA44ZT')
+        request.addHeader(auth_header, b'my uid')
+        request.addHeader(roles_header, b'docent')
+        self.assertEqual(
+            plugin._get_all_header_properties(request),
+            {'fullname': b'Maurits van Rees',
+             'rol': b'docent',
+             'schoolbrin': b'AA44ZT',
+             'uid': b'my uid',
              })
 
         # Whitespace within a header is kept.
@@ -356,7 +368,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Check the response.
         out.seek(0)
-        self.assertEqual(out.read(), '')
+        self.assertEqual(out.read(), b'')
         self.assertEqual(response.headers['location'], url)
 
     def test_extractCredentials(self):
@@ -414,10 +426,10 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(auth_header, 'maurits')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': '',
-             'rol': '',
-             'schoolbrin': '',
-             'uid': 'maurits'})
+            {'fullname': b'',
+             'rol': b'',
+             'schoolbrin': b'',
+             'uid': u'maurits'})
         request.addHeader('EA_PROFILE_firstname', 'Maurits')
         request.addHeader('EA_PROFILE_middlename', 'van')
         request.addHeader('EA_PROFILE_lastname', 'Rees')
@@ -425,14 +437,14 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': 'Maurits van Rees',
+            {'fullname': b'Maurits van Rees',
              'rol': 'docent',
              'schoolbrin': 'AA44ZT',
              'uid': 'maurits'})
         request.addHeader(roles_header, '  LEERling  \t ')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': 'Maurits van Rees',
+            {'fullname': b'Maurits van Rees',
              'rol': 'leerling',
              'schoolbrin': 'AA44ZT',
              'uid': 'maurits'})

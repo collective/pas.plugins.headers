@@ -284,7 +284,7 @@ class HeaderPlugin(BasePlugin):
             return result
         for member_prop, headers, parser in self._parse_memberdata_to_header():
             values = [
-                request.getHeader(header_prop, '').strip()
+                request.getHeader(header_prop, b'').strip()
                 for header_prop in headers]
             if parser is not None:
                 values = [parse(parser, value) for value in values]

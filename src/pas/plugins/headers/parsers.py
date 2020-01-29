@@ -10,12 +10,15 @@ _true_chars = 'y j t 1'.split()
 
 
 def _boolean(value):
-    if not isinstance(value, six.string_types):
+    if not isinstance(value, (six.binary_type, six.text_type)):
         return bool(value)
     value = value.strip()
     if not value:
         return False
     # Compare the first character.
+    # Note: on Python 3 b'a'[0] == 102..., so we need text type
+    if isinstance(value, six.binary_type):
+        value = value.decode("utf-8")
     first = value[0].lower()
     return first in _true_chars
 
@@ -28,21 +31,21 @@ def _int(value):
 
 
 def _lower(value):
-    if not isinstance(value, six.string_types):
+    if not isinstance(value, (six.binary_type, six.text_type)):
         return ''
     value = value.strip()
     return value.lower()
 
 
 def _upper(value):
-    if not isinstance(value, six.string_types):
+    if not isinstance(value, (six.binary_type, six.text_type)):
         return ''
     value = value.strip()
     return value.upper()
 
 
 def _split(value):
-    if not isinstance(value, six.string_types):
+    if not isinstance(value, (six.binary_type, six.text_type)):
         return []
     return value.split()
 
