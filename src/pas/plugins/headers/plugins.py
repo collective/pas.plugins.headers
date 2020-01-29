@@ -231,9 +231,12 @@ class HeaderPlugin(BasePlugin):
         # Compare them lowercase.
         # In the result we should only have the spelling from allowed_roles.
         # So prepare a dictionary with keys 'lowercase' and values 'original'.
-        allowed_roles = {
-            role.lower(): role for role in self.allowed_roles
-        }
+        # And it should be text.
+        allowed_roles = {}
+        for role in self.allowed_roles:
+            if isinstance(role, bytes):
+                role = role.decode("utf-8")
+            allowed_roles[role.lower()] = role
         for role in roles:
             canonical_role = allowed_roles.get(role.lower())
             if not canonical_role:
