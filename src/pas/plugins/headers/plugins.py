@@ -140,6 +140,10 @@ class HeaderPlugin(BasePlugin):
         """
         creds = {}
         for header in self.required_headers:
+            # header name must be text, not bytes!
+            # But we get a tuple of bytes in Plone 5.2 Python3 ...
+            if isinstance(header, bytes):
+                header = header.decode("utf-8")
             if request.getHeader(header, _MARKER) is _MARKER:
                 return creds
         creds['user_id'] = self._get_userid(request)
@@ -248,12 +252,19 @@ class HeaderPlugin(BasePlugin):
         return request.getHeader(self.userid_header)
 
     def _parse_memberdata_to_header(self):
-        """Parse the memberdata_to_header property."""
+        """Parse the memberdata_to_header property.
+
+        Everything must be text (unicode), otherwise various things break,
+        like calling request.getHeader, and creating a memberdata property sheet.
+        At least on Plone 5.2 Python 3.
+        """
         result = []
         for line in self.memberdata_to_header:
             line = line.strip()
             if not line:
                 continue
+            if isinstance(line, bytes):
+                line = line.decode("utf-8")
             if line.startswith('#'):
                 continue
             pipes = line.count('|')
