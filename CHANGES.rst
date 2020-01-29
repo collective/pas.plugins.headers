@@ -5,7 +5,7 @@ Changelog
 1.0.2 (unreleased)
 ------------------
 
-- Added basic Python 3 compatibility with six.  [maurits]
+- Added Plone 5.2, Python 3 compatibility.  [maurits]
 
 
 1.0.1 (2019-11-01)
