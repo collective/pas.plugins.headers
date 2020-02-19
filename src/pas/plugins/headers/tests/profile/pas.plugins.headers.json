@@ -5,6 +5,7 @@
         "Zebra"
     ],
     "deny_unauthorized": true,
+    "create_ticket": true,
     "memberdata_to_header": [
         "uid|HEADER_uid|lower",
         "fullname|HEADER_firstname HEADER_lastname"

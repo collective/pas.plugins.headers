@@ -78,6 +78,7 @@ class HeaderPlugin(BasePlugin):
     deny_unauthorized = False
     redirect_url = ''
     memberdata_to_header = ()
+    create_ticket = False
     _properties = (
         dict(id='userid_header', type='string', mode='w',
              label='Header to use as user id'),
@@ -99,6 +100,9 @@ class HeaderPlugin(BasePlugin):
              label='Mapping from memberdata property to request header. '
                    'Format: propname|header1 header2',
              ),
+        dict(id='create_ticket', type='boolean', mode='w',
+             label='Create authentication ticket. '
+                   'Then headers need not be checked on all urls.'),
     )
 
     def challenge(self, request, response):
@@ -167,7 +171,28 @@ class HeaderPlugin(BasePlugin):
         user_id = credentials.get('user_id')
         if not user_id:
             return
+        if self.create_ticket:
+            self._setupTicket(user_id)
         return (user_id, user_id)
+
+    def _setupTicket(self, user_id):
+        """Set up authentication ticket (__ac cookie) with plone.session.
+
+        Only call this when self.create_ticket is True.
+        """
+        pas = self._getPAS()
+        if pas is None:
+            return
+        if 'session' not in pas:
+            return
+        info = pas._verifyUser(pas.plugins, user_id=user_id)
+        if info is None:
+            logger.debug('No user found matching header. Will not set up session.')
+            return
+        request = self.REQUEST
+        response = request['RESPONSE']
+        pas.session._setupSession(user_id, response)
+        logger.debug('Done setting up session/ticket for %s' % user_id)
 
     def getPropertiesForUser(self, user, request=None):
         """ user -> {...}
