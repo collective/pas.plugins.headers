@@ -45,7 +45,7 @@ Start Plone and install the plugin in the Add-ons control panel.
 Compatibility
 -------------
 
-This has been tested to work on Plone 4.3 and 5.1.
+This has been tested to work on Plone 4.3 and 5.1 and 5.2 (Python 2.7 and 3.7).
 
 
 Plain Zope?
@@ -107,6 +107,15 @@ These are the properties that you can edit:
     You can also combine several headers:
     ``propname|header_with_firstname header_with_lastname``.
 
+``create_ticket``.
+  Create an authentication ticket (``__ac`` cookie) with ``plone.session``.
+  Default: false.
+  When reading headers, this checks if Plone knows this user.
+  If so, we create an authentication ticket.
+  Then you could let your frontend server (nginx, Apache) only set the headers for some urls, instead of for all.
+  Note that this does not work for root Zope users, and it does not take over properties and roles.
+  See also `issue 6 <https://github.com/collective/pas.plugins.headers/issues/6>`_.
+
 
 Configuration via GenericSetup
 ------------------------------
@@ -124,6 +133,7 @@ Full example:
             "Member",
             "Zebra"
         ],
+        "create_ticket": true,
         "deny_unauthorized": true,
         "memberdata_to_header": [
             "uid|HEADER_uid|lower",
