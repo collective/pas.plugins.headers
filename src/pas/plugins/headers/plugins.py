@@ -187,12 +187,12 @@ class HeaderPlugin(BasePlugin):
             return
         info = pas._verifyUser(pas.plugins, user_id=user_id)
         if info is None:
-            logger.warning('No user found matching header. Will not set up session.')
+            logger.debug('No user found matching header. Will not set up session.')
             return
         request = self.REQUEST
         response = request['RESPONSE']
         pas.session._setupSession(user_id, response)
-        logger.info('Done setting up session/ticket for %s' % user_id)
+        logger.debug('Done setting up session/ticket for %s' % user_id)
 
     def getPropertiesForUser(self, user, request=None):
         """ user -> {...}
