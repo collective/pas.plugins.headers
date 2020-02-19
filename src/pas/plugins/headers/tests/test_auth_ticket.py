@@ -5,6 +5,7 @@ from pas.plugins.headers.utils import PLUGIN_ID
 from plone import api
 from plone.app.testing import setRoles
 from plone.app.testing import TEST_USER_ID
+from plone.app.testing import TEST_USER_NAME
 
 import unittest
 
@@ -33,18 +34,21 @@ class TestAuthTicket(unittest.TestCase):
         self.assertEqual(self.plugin.authenticateCredentials({
             'user_id': TEST_USER_ID, 'extractor': PLUGIN_ID
         }), (TEST_USER_ID, TEST_USER_ID))
-        response = self.portal.REQUEST.response
+        request = self.portal.REQUEST
+        response = request.response
         self.assertIn('__ac', response.cookies)
         cookie = response.cookies['__ac']
         value = cookie.pop('value', None)
         self.assertIsNotNone(value)
         self.assertDictEqual(cookie, {'path': '/', 'secure': False, 'http_only': True, 'quoted': True})
-        import binascii
-        ticket = binascii.a2b_base64(value)
-        ticket_data = self.session._validateTicket(ticket)
-        self.assertTrue(ticket_data)
-        (digest, userid, tokens, user_data, timestamp) = ticket_data
+
+        # Now set the cookie from the response on the request,
+        # and see if plone.session can read it.
+        request.cookies['__ac'] = value
+        credentials = self.session.extractCredentials(request)
+        self.assertTrue(credentials)
+        result = self.session.authenticateCredentials(credentials)
+        self.assertTrue(result)
+        userid, login = result
         self.assertEqual(userid, TEST_USER_ID)
-
-
-
+        self.assertEqual(login, TEST_USER_NAME)
