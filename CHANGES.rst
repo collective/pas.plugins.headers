@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.1.1 (unreleased)
+1.2.0 (unreleased)
 ------------------
 
 - Added option ``create_ticket``.  When reading headers, this checks if Plone knows this user.
