@@ -328,9 +328,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Check the response.
         out.seek(0)
-        self.assertNotIn(
-            b'Fout: Geen authenticatie headers gevonden.',
-            out.read())
+        self.assertFalse(out.read())
 
     def test_challenge_deny(self):
         # Prepare the plugin.
