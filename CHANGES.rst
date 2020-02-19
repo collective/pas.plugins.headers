@@ -5,6 +5,11 @@ Changelog
 1.2.0 (unreleased)
 ------------------
 
+- Added ``headerlogin`` page.
+  This redirects to the ``came_from`` query parameter or the navigation root.
+  You can use this in the ``redirect_url`` option, and have your frontend server force SAML or CAS login on it.
+  [maurits]
+
 - Added option ``create_ticket``.  When reading headers, this checks if Plone knows this user.
   If so, we create an authentication ticket (``__ac`` cookie) with ``plone.session``.
   Then you could let your frontend server only set the headers for some urls, instead of for all.
