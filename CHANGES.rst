@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.1.0 (unreleased)
+1.1.0 (2020-02-19)
 ------------------
 
 - Added Plone 5.2, Python 3 compatibility.  [maurits]
