@@ -8,6 +8,15 @@ from plone.app.testing import TEST_USER_ID
 import unittest
 
 
+try:
+    # Plone 5.1+
+    from Products.CMFPlone.utils import get_installer
+except ImportError:
+    # Plone 5.0/4.3
+    def get_installer(context, request=None):
+        return api.portal.get_tool('portal_quickinstaller')
+
+
 class TestSetup(unittest.TestCase):
     """Test that pas.plugins.headers is properly installed."""
 
@@ -16,7 +25,7 @@ class TestSetup(unittest.TestCase):
     def setUp(self):
         """Custom shared utility setup for tests."""
         self.portal = self.layer['portal']
-        self.installer = api.portal.get_tool('portal_quickinstaller')
+        self.installer = get_installer(self.portal)
 
     def test_product_installed(self):
         """Test if pas.plugins.headers is installed."""
@@ -61,7 +70,7 @@ class TestUninstall(unittest.TestCase):
 
     def setUp(self):
         self.portal = self.layer['portal']
-        self.installer = api.portal.get_tool('portal_quickinstaller')
+        self.installer = get_installer(self.portal)
         roles_before = api.user.get_roles(TEST_USER_ID)
         setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.installer.uninstallProducts(['pas.plugins.headers'])

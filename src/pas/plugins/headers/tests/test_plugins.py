@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from StringIO import StringIO
+from io import BytesIO
 from zope.publisher.browser import TestRequest
 from ZPublisher.HTTPResponse import HTTPResponse
 
+import six
 import unittest
 
 
@@ -61,53 +62,58 @@ class HeaderPluginUnitTests(unittest.TestCase):
         from pas.plugins.headers.plugins import decode_header
         self.assertEqual(decode_header(None), None)
         self.assertEqual(decode_header(''), u'')
-        self.assertTrue(isinstance(decode_header(''), unicode))
+        self.assertEqual(decode_header(b''), u'')
+        self.assertTrue(isinstance(decode_header(''), six.text_type))
         # u'\xae' is (R)egistered trademark.
         self.assertEqual(decode_header(u'\xae'), u'\xae')  # unicode
-        self.assertEqual(decode_header('\xc2\xae'), u'\xae')  # utf-8
-        self.assertEqual(decode_header('\xae'), u'\xae')  # latin-1
+        self.assertEqual(decode_header(b'\xc2\xae'), u'\xae')  # utf-8
+        self.assertEqual(decode_header(b'\xae'), u'\xae')  # latin-1
 
     def test_combine_values(self):
         from pas.plugins.headers.plugins import combine_values
-        self.assertEqual(combine_values(None), u'')
-        self.assertEqual(combine_values('My name'), u'')
-        self.assertEqual(combine_values({}), u'')
-        self.assertEqual(combine_values([]), u'')
-        self.assertEqual(combine_values(()), u'')
+        self.assertEqual(combine_values(None), b'')
+        self.assertEqual(combine_values('My name'), b'')
+        self.assertEqual(combine_values({}), b'')
+        self.assertEqual(combine_values([]), b'')
+        self.assertEqual(combine_values(()), b'')
         self.assertEqual(combine_values(
-            ['Maurits']),
-            'Maurits')
+            [b'Maurits']),
+            b'Maurits')
+        self.assertEqual(combine_values(
+            [u'Maurits']),
+            b'Maurits')
         # 'Maurits' == u'Maurits' because both contain only ascii.
         # But we *do* want to know if we get unicode or a string back.
-        self.assertTrue(isinstance(combine_values(['Maurits']), str))
+        # Also, on Python 3 they are NOT the same at all.
+        self.assertTrue(isinstance(combine_values(['Maurits']), six.binary_type))
         self.assertEqual(
             combine_values(['Maurits', 'Rees']),
-            'Maurits Rees')
+            b'Maurits Rees')
         self.assertEqual(
             combine_values(['Maurits', '', 'Rees']),
-            'Maurits Rees')
+            b'Maurits Rees')
         self.assertEqual(
             combine_values(['Maurits', 'van', 'Rees']),
-            'Maurits van Rees')
+            b'Maurits van Rees')
         self.assertEqual(
             combine_values(['    Maurits\t\n\r  ', '  ', None, '    Rees \n']),
-            'Maurits Rees')
+            b'Maurits Rees')
         self.assertEqual(
             combine_values((u'Arthur', u'Dent')),
-            'Arthur Dent')
+            b'Arthur Dent')
         # In standard Plone we get a string encoded with utf-8.
         self.assertEqual(
             combine_values([u'Arth\xfcr', u'Dent']),
-            'Arth\xc3\xbcr Dent')
-        self.assertTrue(isinstance(combine_values([u'Arth\xfcr']), str))
+            b'Arth\xc3\xbcr Dent')
+        self.assertTrue(isinstance(combine_values([u'Arth\xfcr']), six.binary_type))
         # We can combine more than three.
         self.assertEqual(
             combine_values(['', 'Hello,', 'Maurits', '   ' 'van', 'Rees']),
-            'Hello, Maurits van Rees')
+            b'Hello, Maurits van Rees')
         # And they can be unicode / encoded string / ascii string.
         self.assertEqual(
-            combine_values(['Dent', u'Arth\xfcr', u'Dent', 'Arth\xc3\xbcr']),
-            'Dent Arth\xc3\xbcr Dent Arth\xc3\xbcr')
+            combine_values([b'Dent', u'Arth\xfcr', u'Dent', b'Arth\xc3\xbcr']),
+            b'Dent Arth\xc3\xbcr Dent Arth\xc3\xbcr')
 
     def test_get_userid(self):
         from pas.plugins.headers.plugins import HeaderPlugin
@@ -248,22 +254,23 @@ class HeaderPluginUnitTests(unittest.TestCase):
         roles_header = plugin.roles_header
         self.assertEqual(plugin._get_all_header_properties(None), {})
         request = HeaderRequest()
+        plugin._get_all_header_properties(request)
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': '',
-             'rol': '',
-             'schoolbrin': '',
-             'uid': '',
+            {'fullname': b'',
+             'rol': b'',
+             'schoolbrin': b'',
+             'uid': b'',
              })
-        request.addHeader('EA_PROFILE_foo', 'bar')
-        request.addHeader('EA_PROFILE_firstname', 'Maurits')
-        request.addHeader('EA_PROFILE_middlename', 'van')
+        request.addHeader('EA_PROFILE_foo', b'bar')
+        request.addHeader('EA_PROFILE_firstname', b'Maurits')
+        request.addHeader('EA_PROFILE_middlename', b'van')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': 'Maurits van',
-             'rol': '',
-             'schoolbrin': '',
-             'uid': '',
+            {'fullname': b'Maurits van',
+             'rol': b'',
+             'schoolbrin': b'',
+             'uid': b'',
              })
         request.addHeader('EA_PROFILE_lastname', 'Rees')
         request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
@@ -271,10 +278,21 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': 'Maurits van Rees',
+            {'fullname': b'Maurits van Rees',
              'rol': 'docent',
              'schoolbrin': 'AA44ZT',
              'uid': 'my uid',
+             })
+        request.addHeader('EA_PROFILE_lastname', b'Rees')
+        request.addHeader('EA_PROFILE_schoolbrin', b'AA44ZT')
+        request.addHeader(auth_header, b'my uid')
+        request.addHeader(roles_header, b'docent')
+        self.assertEqual(
+            plugin._get_all_header_properties(request),
+            {'fullname': b'Maurits van Rees',
+             'rol': b'docent',
+             'schoolbrin': b'AA44ZT',
+             'uid': b'my uid',
              })
 
         # Whitespace within a header is kept.
@@ -300,7 +318,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Prepare the request.
         request = HeaderRequest()
-        out = StringIO()
+        out = BytesIO()
         response = HTTPResponse(stdout=out)
 
         # When the plugin does not make a challenge, it must not return a
@@ -310,7 +328,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # Check the response.
         out.seek(0)
         self.assertNotIn(
-            'Fout: Geen authenticatie headers gevonden.',
+            b'Fout: Geen authenticatie headers gevonden.',
             out.read())
 
     def test_challenge_deny(self):
@@ -321,7 +339,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Prepare the request.
         request = HeaderRequest()
-        out = StringIO()
+        out = BytesIO()
         response = HTTPResponse(stdout=out)
 
         # When the plugin makes a challenge, it must return a True value.
@@ -330,7 +348,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # Check the response.
         out.seek(0)
         self.assertIn(
-            'ERROR: denying any unauthorized access.',
+            b'ERROR: denying any unauthorized access.',
             out.read())
 
     def test_challenge_redirect(self):
@@ -342,7 +360,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Prepare the request.
         request = HeaderRequest()
-        out = StringIO()
+        out = BytesIO()
         response = HTTPResponse(stdout=out)
 
         # When the plugin makes a challenge, it must return a True value.
@@ -350,7 +368,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Check the response.
         out.seek(0)
-        self.assertEqual(out.read(), '')
+        self.assertEqual(out.read(), b'')
         self.assertEqual(response.headers['location'], url)
 
     def test_extractCredentials(self):
@@ -408,10 +426,10 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(auth_header, 'maurits')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': '',
-             'rol': '',
-             'schoolbrin': '',
-             'uid': 'maurits'})
+            {'fullname': b'',
+             'rol': b'',
+             'schoolbrin': b'',
+             'uid': u'maurits'})
         request.addHeader('EA_PROFILE_firstname', 'Maurits')
         request.addHeader('EA_PROFILE_middlename', 'van')
         request.addHeader('EA_PROFILE_lastname', 'Rees')
@@ -419,14 +437,14 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': 'Maurits van Rees',
+            {'fullname': b'Maurits van Rees',
              'rol': 'docent',
              'schoolbrin': 'AA44ZT',
              'uid': 'maurits'})
         request.addHeader(roles_header, '  LEERling  \t ')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': 'Maurits van Rees',
+            {'fullname': b'Maurits van Rees',
              'rol': 'leerling',
              'schoolbrin': 'AA44ZT',
              'uid': 'maurits'})

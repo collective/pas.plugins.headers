@@ -4,6 +4,7 @@ from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING 
 from pas.plugins.headers.utils import get_plugin
 
 import json
+import six
 import unittest
 
 
@@ -117,23 +118,23 @@ class TestImport(ExportImportBaseTestCase):
         self.assertTupleEqual(
             self.plugin.allowed_roles,
             (
-                'Member',
-                'Zebra',
+                b'Member',
+                b'Zebra',
             ),
         )
         self.assertTrue(self.plugin.deny_unauthorized)
         self.assertTupleEqual(
             self.plugin.memberdata_to_header,
             (
-                'uid|HEADER_uid|lower',
-                'fullname|HEADER_firstname HEADER_lastname',
+                b'uid|HEADER_uid|lower',
+                b'fullname|HEADER_firstname HEADER_lastname',
             ),
         )
         self.assertEqual(
-            self.plugin.redirect_url, 'https://maurits.vanrees.org')
-        self.assertTupleEqual(self.plugin.required_headers, ('uid', 'test'))
-        self.assertEqual(self.plugin.roles_header, 'roles')
-        self.assertEqual(self.plugin.userid_header, 'uid')
+            self.plugin.redirect_url, b'https://maurits.vanrees.org')
+        self.assertTupleEqual(self.plugin.required_headers, (b'uid', b'test'))
+        self.assertEqual(self.plugin.roles_header, b'roles')
+        self.assertEqual(self.plugin.userid_header, b'uid')
 
     def test_import_no_file(self):
         """When the import file is not there, nothing should go wrong."""
@@ -167,40 +168,40 @@ class TestImport(ExportImportBaseTestCase):
         import_properties(self._makeContext(json.dumps(settings)))
         self.assertTupleEqual(
             self.plugin.allowed_roles,
-            ('missile', 'target'),
+            (b'missile', b'target'),
         )
         self.assertTrue(self.plugin.deny_unauthorized)
         self.assertTupleEqual(
             self.plugin.memberdata_to_header,
             (
-                'uid|PROFILE_uid',
-                'fullname|PROFILE_firstname PROFILE_lastname',
-                'role|PROFILE_role|lower',
+                b'uid|PROFILE_uid',
+                b'fullname|PROFILE_firstname PROFILE_lastname',
+                b'role|PROFILE_role|lower',
             ),
         )
         self.assertEqual(
-            self.plugin.redirect_url, 'https://maurits.vanrees.org')
+            self.plugin.redirect_url, b'https://maurits.vanrees.org')
         self.assertTupleEqual(
             self.plugin.required_headers,
-            ('uid', 'role'),
+            (b'uid', b'role'),
         )
-        self.assertEqual(self.plugin.roles_header, 'portal_roles')
-        self.assertEqual(self.plugin.userid_header, 'uid')
+        self.assertEqual(self.plugin.roles_header, b'portal_roles')
+        self.assertEqual(self.plugin.userid_header, b'uid')
 
         # Explicitly test the types.
         # We want string, not unicode: when you save the properties form
         # in the ZMI, you always get a string.
         # And we want tuples, not lists.
         self.assertIsInstance(self.plugin.allowed_roles, tuple)
-        self.assertIsInstance(self.plugin.allowed_roles[0], str)
+        self.assertIsInstance(self.plugin.allowed_roles[0], six.binary_type)
         self.assertIsInstance(self.plugin.deny_unauthorized, bool)
         self.assertIsInstance(self.plugin.memberdata_to_header, tuple)
-        self.assertIsInstance(self.plugin.memberdata_to_header[0], str)
-        self.assertIsInstance(self.plugin.redirect_url, str)
+        self.assertIsInstance(self.plugin.memberdata_to_header[0], six.binary_type)
+        self.assertIsInstance(self.plugin.redirect_url, six.binary_type)
         self.assertIsInstance(self.plugin.required_headers, tuple)
-        self.assertIsInstance(self.plugin.required_headers[0], str)
-        self.assertIsInstance(self.plugin.roles_header, str)
-        self.assertIsInstance(self.plugin.userid_header, str)
+        self.assertIsInstance(self.plugin.required_headers[0], six.binary_type)
+        self.assertIsInstance(self.plugin.roles_header, six.binary_type)
+        self.assertIsInstance(self.plugin.userid_header, six.binary_type)
 
     def test_import_purge_false(self):
         """Test purge=false."""
@@ -232,7 +233,7 @@ class TestImport(ExportImportBaseTestCase):
         self.assertTupleEqual(self.plugin.memberdata_to_header, ())
         self.assertEqual(self.plugin.redirect_url, '')
         self.assertTupleEqual(self.plugin.required_headers, ())
-        self.assertEqual(self.plugin.userid_header, 'my_uid')
+        self.assertEqual(self.plugin.userid_header, b'my_uid')
 
     def test_import_no_plugin(self):
         """Test that import does not fail when plugin is not there."""
@@ -272,7 +273,7 @@ class TestImport(ExportImportBaseTestCase):
             'userid_header': 'my_uid',
         }
         import_properties(self._makeContext(json.dumps(settings)))
-        self.assertEqual(self.plugin.userid_header, 'my_uid')
+        self.assertEqual(self.plugin.userid_header, b'my_uid')
         marker = object()
         self.assertIs(getattr(self.plugin, 'unknown', marker), marker)
 
@@ -317,7 +318,10 @@ class TestExport(ExportImportBaseTestCase):
         self._configurePlugin()
         context = self._makeContext()
         export_properties(context)
+        # The properties are exported by json.dumps, which returns str in both Python 2 and 3.
+        # self.assertIsInstance(context.get_exported_data(), six.binary_type)
         self.assertIsInstance(context.get_exported_data(), str)
+        # json.loads always gives unicode
         self.assertDictEqual(
             json.loads(context.get_exported_data()),
             {

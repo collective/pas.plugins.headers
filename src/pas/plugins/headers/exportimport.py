@@ -4,6 +4,7 @@ from pas.plugins.headers.utils import get_plugin
 from pas.plugins.headers.utils import PLUGIN_ID
 
 import json
+import six
 
 
 FILENAME = 'pas.plugins.headers.json'
@@ -41,10 +42,10 @@ def import_properties(context):
             continue
         # When saving in the ZMI, you always get a string,
         # so we want this for import too.
-        if isinstance(prop_value, unicode):
+        if isinstance(prop_value, six.text_type):
             prop_value = prop_value.encode('utf-8')
         elif isinstance(prop_value, list):
-            if prop_value and isinstance(prop_value[0], unicode):
+            if prop_value and isinstance(prop_value[0], six.text_type):
                 prop_value = [v.encode('utf-8') for v in prop_value]
         logger.debug('Setting %s to %r', prop_name, prop_value)
         # Note that lists are automatically turned into tuples.

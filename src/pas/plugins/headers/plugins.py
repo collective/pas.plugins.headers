@@ -11,6 +11,7 @@ from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from Products.PluggableAuthService.utils import classImplements
 
 import logging
+import six
 
 
 logger = logging.getLogger(__name__)
@@ -25,9 +26,7 @@ def decode_header(value):
     Firefox plugin gives me latin-1.
     The same might be true for the live server.
     """
-    if not isinstance(value, basestring):
-        return value
-    if isinstance(value, unicode):
+    if not isinstance(value, six.binary_type):
         return value
     try:
         return value.decode('utf-8')
@@ -49,7 +48,7 @@ def combine_values(values):
     returns an encoded string.  So *no* unicode.
     """
     if not isinstance(values, (list, tuple)):
-        return ''
+        return b''
     # filter out empty values.
     values = filter(None, values)
     # Turn values into unicode so we can safely combine them.
@@ -118,7 +117,7 @@ class HeaderPlugin(BasePlugin):
         if self.deny_unauthorized:
             # We do not give the user a change to login.
             response.write(
-                'ERROR: denying any unauthorized access.\n')
+                b'ERROR: denying any unauthorized access.\n')
             return True
         if self.redirect_url:
             logger.debug('Redirecting to %s', self.redirect_url)
@@ -141,6 +140,10 @@ class HeaderPlugin(BasePlugin):
         """
         creds = {}
         for header in self.required_headers:
+            # header name must be text, not bytes!
+            # But we get a tuple of bytes in Plone 5.2 Python3 ...
+            if isinstance(header, bytes):
+                header = header.decode("utf-8")
             if request.getHeader(header, _MARKER) is _MARKER:
                 return creds
         creds['user_id'] = self._get_userid(request)
@@ -228,9 +231,12 @@ class HeaderPlugin(BasePlugin):
         # Compare them lowercase.
         # In the result we should only have the spelling from allowed_roles.
         # So prepare a dictionary with keys 'lowercase' and values 'original'.
-        allowed_roles = {
-            role.lower(): role for role in self.allowed_roles
-        }
+        # And it should be text.
+        allowed_roles = {}
+        for role in self.allowed_roles:
+            if isinstance(role, bytes):
+                role = role.decode("utf-8")
+            allowed_roles[role.lower()] = role
         for role in roles:
             canonical_role = allowed_roles.get(role.lower())
             if not canonical_role:
@@ -249,12 +255,19 @@ class HeaderPlugin(BasePlugin):
         return request.getHeader(self.userid_header)
 
     def _parse_memberdata_to_header(self):
-        """Parse the memberdata_to_header property."""
+        """Parse the memberdata_to_header property.
+
+        Everything must be text (unicode), otherwise various things break,
+        like calling request.getHeader, and creating a memberdata property sheet.
+        At least on Plone 5.2 Python 3.
+        """
         result = []
         for line in self.memberdata_to_header:
             line = line.strip()
             if not line:
                 continue
+            if isinstance(line, bytes):
+                line = line.decode("utf-8")
             if line.startswith('#'):
                 continue
             pipes = line.count('|')
@@ -285,7 +298,7 @@ class HeaderPlugin(BasePlugin):
             return result
         for member_prop, headers, parser in self._parse_memberdata_to_header():
             values = [
-                request.getHeader(header_prop, '').strip()
+                request.getHeader(header_prop, b'').strip()
                 for header_prop in headers]
             if parser is not None:
                 values = [parse(parser, value) for value in values]
