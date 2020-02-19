@@ -46,6 +46,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         plugin.userid_header = 'EA_PROFILE_uid'
         plugin.required_headers = ('EA_PROFILE_uid', 'EA_PROFILE_role')
         plugin.deny_unauthorized = True
+        plugin.create_ticket = True
         plugin.roles_header = 'EA_PROFILE_role'
         plugin.allowed_roles = ('docent', 'leerling')
         plugin.memberdata_to_header = (

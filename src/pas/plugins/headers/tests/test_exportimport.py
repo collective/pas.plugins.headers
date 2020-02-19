@@ -52,6 +52,7 @@ class ExportImportBaseTestCase(unittest.TestCase):
     def _configurePlugin(self):
         """Give the plugin some data."""
         self.plugin.allowed_roles = ('root',)
+        self.plugin.create_ticket = True
         self.plugin.deny_unauthorized = True
         self.plugin.memberdata_to_header = ('foo|bar',)
         self.plugin.redirect_url = 'https://example.org'
@@ -292,6 +293,7 @@ class TestExport(ExportImportBaseTestCase):
                        context.get_exported_data().splitlines()]),
             """{
 "allowed_roles": [],
+"create_ticket": false,
 "deny_unauthorized": false,
 "memberdata_to_header": [],
 "redirect_url": "",
@@ -305,6 +307,7 @@ class TestExport(ExportImportBaseTestCase):
             {
                 'allowed_roles': [],
                 'deny_unauthorized': False,
+                'create_ticket': False,
                 'memberdata_to_header': [],
                 'redirect_url': '',
                 'required_headers': [],
@@ -327,6 +330,7 @@ class TestExport(ExportImportBaseTestCase):
             {
                 'allowed_roles': ['root'],
                 'deny_unauthorized': True,
+                'create_ticket': True,
                 'memberdata_to_header': ['foo|bar'],
                 'redirect_url': 'https://example.org',
                 'required_headers': ['foo'],
