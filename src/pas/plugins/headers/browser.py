@@ -46,6 +46,9 @@ class HeaderLogin(BrowserView):
         return came_from
 
     def __call__(self):
+        if api.user.is_anonymous():
+            # Return a message, to avoid infinite redirects.
+            return "ERROR: headerlogin failed"
         url = self.get_came_from()
         if url:
             portal_url = api.portal.get_tool('portal_url')

@@ -5,6 +5,9 @@ Changelog
 1.2.0 (unreleased)
 ------------------
 
+- Add ``came_from`` query parameter when the challenge plugin redirects.
+  [maurits]
+
 - Added ``headerlogin`` page.
   This redirects to the ``came_from`` query parameter or the navigation root.
   You can use this in the ``redirect_url`` option, and have your frontend server force SAML or CAS login on it.
