@@ -11,10 +11,7 @@ import unittest
 
 
 class TestHeaderLogin(unittest.TestCase):
-    """Test that the headerlogin page works as intended.
-
-    TODO: test with actual requests headers.
-    """
+    """Test that the headerlogin page works as intended."""
 
     layer = PAS_PLUGINS_HEADERS_FUNCTIONAL_TESTING
 
