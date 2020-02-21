@@ -31,7 +31,7 @@ LOGIN_TEMPLATE_IDS = set([
 
 class HeaderLogin(BrowserView):
 
-    def get_came_from(self):
+    def get_came_from(self, include_login_templates=False):
         came_from = self.request.get('came_from', None)
         if not came_from:
             came_from = self.request.get('HTTP_REFERER', None)
@@ -41,21 +41,25 @@ class HeaderLogin(BrowserView):
         if not url_tool.isURLInPortal(came_from):
             return
         came_from_path = parse.urlparse(came_from)[2].split('/')
-        for login_template_id in LOGIN_TEMPLATE_IDS:
-            if login_template_id in came_from_path:
-                return
+        if not include_login_templates:
+            for login_template_id in LOGIN_TEMPLATE_IDS:
+                if login_template_id in came_from_path:
+                    return
         return came_from
 
     def __call__(self):
+        url = self.get_came_from()
         if api.user.is_anonymous():
             # We might try to let the user re-authenticate,
             # but that will likely lead to infinite redirects.
-            raise Forbidden("ERROR: headerlogin failed")
-        url = self.get_came_from()
-        if url:
-            portal_url = api.portal.get_tool('portal_url')
-            if not portal_url.isURLInPortal(url):
-                url = None
+            if not url and self.get_came_from(include_login_templates=True):
+                # The user came from a login-related page, so we do not redirect.
+                raise Forbidden("ERROR: headerlogin failed")
+            # Okay, it seems safe to redirect to require_login (or elsewhere).
+            # Actually, require_login itself redirects anonymous users to /login.
+            self.request.response.redirect(self.context.absolute_url() + '/login')
+            return
+
         if not url:
             nav_root = api.portal.get_navigation_root(self.context)
             url = nav_root.absolute_url()

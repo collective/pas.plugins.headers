@@ -24,6 +24,17 @@ class TestHeaderLogin(unittest.TestCase):
         self.browser.handleErrors = False
 
     def test_redirect_anonymous(self):
+        # When an anonymous user ends up on the headerlogin page
+        # without headers, this means CAS/SAML has somehow failed.
+        # We redirect to require_login then (and we end up on login).
+        self.browser.open(self.portal_url + '/headerlogin')
+        self.assertEqual(self.browser.url, self.portal_url + '/login')
+
+        # When we came from a login-related page to headerlogin,
+        # and are still anonymous, then there might be a redirect loop.
+        # We break this loop.
+        # Note that our test browser is currently on a login page,
+        # so visiting headerlogin should see that in the referrer.
         with self.assertRaises(Forbidden):
             self.browser.open(self.portal_url + '/headerlogin')
 

@@ -71,8 +71,9 @@ class TestUnderscoresAndDashes(unittest.TestCase):
         # This will fail because it will really result in a
         # header HTTP_HTTP_REMOTE_USER.
         browser.addHeader('HTTP_REMOTE_USER', SITE_OWNER_NAME)
-        with self.assertRaises(Forbidden):
-            browser.open(self.portal_url + '/headerlogin')
+        browser.open(self.portal_url + '/headerlogin')
+        # We are anonymous, so headerlogin redirects us to standard login.
+        self.assertEqual(browser.url, self.portal_url + '/login')
 
     def test_userid_header_dash_underscore(self):
         self.plugin.userid_header = 'REMOTE-USER'
@@ -135,9 +136,12 @@ class TestFull(unittest.TestCase):
         # so the header in the browser no longer works.
         self.plugin.userid_header = 'NOPE'
         transaction.commit()
+
         # Now check if we are still authenticated.
-        with self.assertRaises(Forbidden):
-            self.browser.open(self.portal_url + '/headerlogin')
+        self.assertEqual(self.browser.url, self.portal_url)
+        self.browser.open(self.portal_url + '/headerlogin')
+        # We are anonymous, so headerlogin redirects us to standard login.
+        self.assertEqual(self.browser.url, self.portal_url + '/login')
 
     def test_plone_user_name(self):
         # We use a login name here.
@@ -157,9 +161,12 @@ class TestFull(unittest.TestCase):
         # so the header in the browser no longer works.
         self.plugin.userid_header = 'NOPE'
         transaction.commit()
+
         # Now check if we are still authenticated.
-        with self.assertRaises(Forbidden):
-            self.browser.open(self.portal_url + '/headerlogin')
+        self.assertEqual(self.browser.url, self.portal_url)
+        self.browser.open(self.portal_url + '/headerlogin')
+        # We are anonymous, so headerlogin redirects us to standard login.
+        self.assertEqual(self.browser.url, self.portal_url + '/login')
 
     def test_plone_user_id(self):
         # Finally a proper Plone user id.
@@ -200,22 +207,33 @@ class TestFull(unittest.TestCase):
         self.assertEqual(self.browser.url, self.portal_url + '/@@overview-controlpanel')
         self.assertIn('__ac', self.browser.cookies)
 
-    def test_redirect(self):
+    def test_redirect_from_unauthorized(self):
         # An anonymous user cannot access the overview controlpanel.
         with self.assertRaises(Unauthorized):
             self.browser.open(self.portal_url + '/@@overview-controlpanel')
 
         # We want to check if the user gets redirected to /headerlogin.
-        # We need to let the browser handle errors then.
+        # But headerlogin redirects us to /login,
+        # and I see no way to ask the test browser to not follow redirects.
+        # Let's start with letting the browser handle exceptions then.
         self.browser.handleErrors = True
-        with self.assertRaises(Exception):
-            # Depending on which zope.testbrowser version and Python version,
-            # you may get different exceptions.
-            self.browser.open(self.portal_url + '/@@overview-controlpanel')
-        self.assertEqual(
-            self.browser.url,
-            '{}/headerlogin?came_from={}/@@overview-controlpanel'.format(
-                self.portal_url, self.portal_url
-            ),
-        )
-        self.assertEqual(self.browser.headers['Status'], '403 Forbidden')
+        self.browser.open(self.portal_url + '/@@overview-controlpanel')
+        self.assertEqual(self.browser.url, self.portal_url + '/login')
+
+    def test_redirect_came_from_login(self):
+        # If we came from a login-related form and are still anonymous,
+        # we should not redirect back.  We want to avoid redirect loops.
+        with self.assertRaises(Forbidden):
+            self.browser.open(
+                '{}/headerlogin?came_from={}/require_login'.format(
+                    self.portal_url, self.portal_url
+                ))
+
+    def test_redirect_referer_login(self):
+        # If our referer is a login-related form and we are still anonymous,
+        # we should not redirect back.  We want to avoid redirect loops.
+        self.browser.open(self.portal_url + '/headerlogin')
+        self.assertEqual(self.browser.url, self.portal_url + '/login')
+        # Now this login page is the referer for our next request.
+        with self.assertRaises(Forbidden):
+            self.browser.open(self.portal_url + '/headerlogin')

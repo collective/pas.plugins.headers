@@ -9,8 +9,11 @@ Changelog
   [maurits]
 
 - Added ``headerlogin`` page.
-  This redirects to the ``came_from`` query parameter or the navigation root.
+  This redirects to the ``came_from`` query parameter or the referer or the navigation root.
   You can use this in the ``redirect_url`` option, and have your frontend server force SAML or CAS login on it.
+  When a user arrives on this page and is still anonymous, then apparently SAML/CAS has not worked.
+  We then redirect to the standard login page.
+  Care is taken to avoid a redirect loop between the login and headerlogin pages.
   [maurits]
 
 - Added option ``create_ticket``.  When reading headers, this checks if Plone knows this user.
