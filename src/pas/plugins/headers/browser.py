@@ -41,7 +41,12 @@ class HeaderLogin(BrowserView):
         if not url_tool.isURLInPortal(came_from):
             return
         came_from_path = parse.urlparse(came_from)[2].split('/')
-        if not include_login_templates:
+        if include_login_templates:
+            if came_from == 'localhost':
+                # localhost is the HTTP_REFERER header when running tests in Plone 4.3 or 5.1.
+                # We don't want it.
+                return
+        else:
             for login_template_id in LOGIN_TEMPLATE_IDS:
                 if login_template_id in came_from_path:
                     return

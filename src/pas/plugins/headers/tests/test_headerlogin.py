@@ -35,6 +35,12 @@ class TestHeaderLogin(unittest.TestCase):
         # We break this loop.
         # Note that our test browser is currently on a login page,
         # so visiting headerlogin should see that in the referrer.
+        # Actually: no, that depends on the zope.testbrowser version.
+        # It was added sometime after the old 3.11.1 from Zope 2.
+        # And it was removed again in 5.5.1.  See the correct reasoning in
+        # https://github.com/zopefoundation/zope.testbrowser/issues/87
+        # So we set a referer ourselves.
+        self.browser.addHeader('Referer', self.portal_url + '/login')
         with self.assertRaises(Forbidden):
             self.browser.open(self.portal_url + '/headerlogin')
 

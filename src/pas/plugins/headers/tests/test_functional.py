@@ -115,6 +115,14 @@ class TestFull(unittest.TestCase):
         self.browser = Browser(self.app)
         self.browser.handleErrors = False
 
+    def _set_referer(self, referer=None):
+        # Some zope.testbrowser versions set a Referer, but not all.
+        # See https://github.com/zopefoundation/zope.testbrowser/issues/87
+        # So we set the referer ourselves.
+        if referer is None:
+            referer = self.browser.url
+        self.browser.addHeader('Referer', referer)
+
     def test_zope_user_id(self):
         # Users at the zope root always need the headers.
         # The __ac cookie does not get set,
@@ -138,7 +146,7 @@ class TestFull(unittest.TestCase):
         transaction.commit()
 
         # Now check if we are still authenticated.
-        self.assertEqual(self.browser.url, self.portal_url)
+        self._set_referer(self.portal_url)
         self.browser.open(self.portal_url + '/headerlogin')
         # We are anonymous, so headerlogin redirects us to standard login.
         self.assertEqual(self.browser.url, self.portal_url + '/login')
@@ -163,7 +171,7 @@ class TestFull(unittest.TestCase):
         transaction.commit()
 
         # Now check if we are still authenticated.
-        self.assertEqual(self.browser.url, self.portal_url)
+        self._set_referer(self.portal_url)
         self.browser.open(self.portal_url + '/headerlogin')
         # We are anonymous, so headerlogin redirects us to standard login.
         self.assertEqual(self.browser.url, self.portal_url + '/login')
@@ -190,6 +198,7 @@ class TestFull(unittest.TestCase):
         self.plugin.userid_header = 'NOPE'
         transaction.commit()
         # Now check if we are still authenticated.
+        self._set_referer()
         self.browser.open(self.portal_url + '/headerlogin')
         # We are, and we actually get redirected to the referrer, our previous page.
         self.assertEqual(self.browser.url, self.portal_url + '/@@overview-controlpanel')
@@ -235,5 +244,6 @@ class TestFull(unittest.TestCase):
         self.browser.open(self.portal_url + '/headerlogin')
         self.assertEqual(self.browser.url, self.portal_url + '/login')
         # Now this login page is the referer for our next request.
+        self._set_referer()
         with self.assertRaises(Forbidden):
             self.browser.open(self.portal_url + '/headerlogin')
