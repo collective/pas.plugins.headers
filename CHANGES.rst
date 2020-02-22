@@ -5,6 +5,17 @@ Changelog
 1.2.0 (unreleased)
 ------------------
 
+- Add ``came_from`` query parameter when the challenge plugin redirects.
+  [maurits]
+
+- Added ``headerlogin`` page.
+  This redirects to the ``came_from`` query parameter or the referer or the navigation root.
+  You can use this in the ``redirect_url`` option, and have your frontend server force SAML or CAS login on it.
+  When a user arrives on this page and is still anonymous, then apparently SAML/CAS has not worked.
+  We then redirect to the standard login page.
+  Care is taken to avoid a redirect loop between the login and headerlogin pages.
+  [maurits]
+
 - Added option ``create_ticket``.  When reading headers, this checks if Plone knows this user.
   If so, we create an authentication ticket (``__ac`` cookie) with ``plone.session``.
   Then you could let your frontend server only set the headers for some urls, instead of for all.

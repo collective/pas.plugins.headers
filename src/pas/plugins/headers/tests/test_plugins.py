@@ -368,7 +368,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # Check the response.
         out.seek(0)
         self.assertEqual(out.read(), b'')
-        self.assertEqual(response.headers['location'], url)
+        self.assertEqual(response.headers['location'], '{}?came_from={}'.format(url, request.URL))
 
     def test_extractCredentials(self):
         from pas.plugins.headers.plugins import HeaderPlugin

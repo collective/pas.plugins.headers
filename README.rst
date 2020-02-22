@@ -97,6 +97,8 @@ These are the properties that you can edit:
     URL to redirect to when unauthorized.
     When empty, it has no effect.
     When set, the Challenge plugin redirects unauthorized users to this url.
+    Usually you would configure your frontend server to force SAML or CAS login on this url.
+    The ``headerlogin`` page defined by this plugin may be a good url.
     If ``deny_unauthorized`` is true, this option is ignored.
 
 ``memberdata_to_header``:
