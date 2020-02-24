@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.2.0 (unreleased)
+1.2.0 (2020-02-24)
 ------------------
 
 - Add ``came_from`` query parameter when the challenge plugin redirects.
