@@ -108,7 +108,7 @@ class TestFull(unittest.TestCase):
         # after the headers are no longer there.
         self.plugin.create_ticket = True
         # On Unauthorized, redirect to our special headerlogin page.
-        self.plugin.redirect_url = 'headerlogin'
+        self.plugin.redirect_url = '/headerlogin'
         # This is the main user id header.
         self.plugin.userid_header = 'REMOTEUSER'
         transaction.commit()

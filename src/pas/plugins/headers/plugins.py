@@ -3,6 +3,7 @@ from .parsers import parse
 from .utils import safe_make_string
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
+from plone import api
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin  # noqa
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
@@ -128,7 +129,15 @@ class HeaderPlugin(BasePlugin):
                 b'ERROR: denying any unauthorized access.\n')
             return True
         if self.redirect_url:
-            url = '{}?came_from={}'.format(self.redirect_url, request.URL)
+            url = self.redirect_url
+            # If url is headerlogin, we want localhost:8080/Plone/headerlogin
+            # and not localhost:8080/Plone/current-folder/headerlogin.
+            # So relative from the site root.
+            # Or from the navigation root, but that needs a context, which we don't have here.
+            # Watch out for '//some.domain' as external redirect url.
+            if '//' not  in url:
+                url = api.portal.get().absolute_url() + url
+            url = '{}?came_from={}'.format(url, request.URL)
             logger.warning('Redirecting to %s', url)
             response.redirect(url, lock=1)
             return True

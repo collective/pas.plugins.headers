@@ -5,6 +5,11 @@ Changelog
 1.2.1 (unreleased)
 ------------------
 
+- Fixed NotFound error when redirect_url started with a slash, for example ``/headerlogin``.
+  In local development it would redirect to /headerlogin on the Zope root, where it does not exist.
+  We now always treat the redirect_url as relative to the Plone site root, unless it is a full url.
+  [maurits]
+
 - Fixed exportimport to always set native strings.
   On Python 3 we were setting bytes, which was wrong.
   Fixed same problem in member properties.
