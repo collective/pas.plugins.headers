@@ -5,7 +5,7 @@ from plone import api
 import unittest
 
 
-class TestUtils(unittest.TestCase):
+class TestGetPlugin(unittest.TestCase):
     """Test that utils.py works."""
 
     layer = PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
@@ -44,3 +44,33 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(plugin.id, PLUGIN_ID)
         self.assertIsInstance(plugin, HeaderPlugin)
         self.assertEqual(plugin, getattr(self.portal.acl_users, PLUGIN_ID))
+
+
+class TestSafeMakeString(unittest.TestCase):
+    """Test that utils.py works."""
+
+    def test_safe_make_string(self):
+        from pas.plugins.headers.utils import safe_make_string
+
+        self.assertEqual(safe_make_string(b''), '')
+        self.assertEqual(safe_make_string(''), '')
+        self.assertEqual(safe_make_string(u''), '')
+
+        # e-with-an-accent.
+        if isinstance('', bytes):
+            # On Python 2 we expect an encoded string.
+            expected = '\xc3\xab'
+        else:
+            # On Python 3 we expect a native string.
+            expected = '\xeb'
+        self.assertEqual(safe_make_string(b'\xc3\xab'), expected)
+        self.assertEqual(safe_make_string(expected), expected)
+        self.assertEqual(safe_make_string(u'\xeb'), expected)
+
+        self.assertEqual(safe_make_string([1, b'two', 'three', u'four']), [1, 'two', 'three', 'four'])
+
+        self.assertEqual(safe_make_string(0), 0)
+        self.assertEqual(safe_make_string(None), None)
+        self.assertEqual(safe_make_string([]), [])
+        self.assertEqual(safe_make_string(()), [])
+        self.assertEqual(safe_make_string(set()), [])

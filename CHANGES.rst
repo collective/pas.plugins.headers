@@ -5,7 +5,8 @@ Changelog
 1.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixed exportimport to always set native strings.
+  On Python 3 we were setting bytes, which was wrong.  [maurits]
 
 
 1.2.0 (2020-02-24)
