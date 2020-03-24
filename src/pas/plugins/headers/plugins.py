@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from .parsers import parse
+from .utils import safe_make_string
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin  # noqa
@@ -45,10 +46,10 @@ def combine_values(values):
     Expected use is for getting a fullname from several values.
 
     For a standard Plone user, member.getProperty('fullname')
-    returns an encoded string.  So *no* unicode.
+    returns a string.  So text on Py 3, bytes on Py 2.
     """
     if not isinstance(values, (list, tuple)):
-        return b''
+        return ''
     # filter out empty values.
     values = filter(None, values)
     # Turn values into unicode so we can safely combine them.
@@ -56,8 +57,10 @@ def combine_values(values):
     # again filter out empty values
     values = filter(None, values)
     full = u' '.join(values)
-    # Encode the result.
-    return full.encode('utf-8')
+    # Encode the result to string on Python 2.
+    if six.PY2:
+        return full.encode('utf-8')
+    return full
 
 
 class HeaderPlugin(BasePlugin):
@@ -324,7 +327,7 @@ class HeaderPlugin(BasePlugin):
             return result
         for member_prop, headers, parser in self._parse_memberdata_to_header():
             values = [
-                request.getHeader(header_prop, b'').strip()
+                request.getHeader(header_prop, '').strip()
                 for header_prop in headers]
             if parser is not None:
                 values = [parse(parser, value) for value in values]

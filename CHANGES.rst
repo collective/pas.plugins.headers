@@ -6,7 +6,9 @@ Changelog
 ------------------
 
 - Fixed exportimport to always set native strings.
-  On Python 3 we were setting bytes, which was wrong.  [maurits]
+  On Python 3 we were setting bytes, which was wrong.
+  Fixed same problem in member properties.
+  [maurits]
 
 
 1.2.0 (2020-02-24)

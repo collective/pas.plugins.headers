@@ -72,49 +72,66 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
     def test_combine_values(self):
         from pas.plugins.headers.plugins import combine_values
-        self.assertEqual(combine_values(None), b'')
-        self.assertEqual(combine_values('My name'), b'')
-        self.assertEqual(combine_values({}), b'')
-        self.assertEqual(combine_values([]), b'')
-        self.assertEqual(combine_values(()), b'')
+        self.assertEqual(combine_values(None), '')
+        self.assertEqual(combine_values('My name'), '')
+        self.assertEqual(combine_values({}), '')
+        self.assertEqual(combine_values([]), '')
+        self.assertEqual(combine_values(()), '')
         self.assertEqual(combine_values(
             [b'Maurits']),
-            b'Maurits')
+            'Maurits')
+        self.assertEqual(combine_values(
+            ['Maurits']),
+            'Maurits')
         self.assertEqual(combine_values(
             [u'Maurits']),
-            b'Maurits')
-        # 'Maurits' == u'Maurits' because both contain only ascii.
-        # But we *do* want to know if we get unicode or a string back.
+            'Maurits')
+        # On Python 2, 'Maurits' == u'Maurits' because both contain only ascii.
+        # But we *do* want to know if we get unicode or bytes back.
         # Also, on Python 3 they are NOT the same at all.
-        self.assertTrue(isinstance(combine_values(['Maurits']), six.binary_type))
+        # In all cases we want a string.
+        self.assertTrue(isinstance(combine_values(['Maurits']), str))
         self.assertEqual(
             combine_values(['Maurits', 'Rees']),
-            b'Maurits Rees')
+            'Maurits Rees')
         self.assertEqual(
             combine_values(['Maurits', '', 'Rees']),
-            b'Maurits Rees')
+            'Maurits Rees')
         self.assertEqual(
             combine_values(['Maurits', 'van', 'Rees']),
-            b'Maurits van Rees')
+            'Maurits van Rees')
         self.assertEqual(
             combine_values(['    Maurits\t\n\r  ', '  ', None, '    Rees \n']),
-            b'Maurits Rees')
+            'Maurits Rees')
         self.assertEqual(
             combine_values((u'Arthur', u'Dent')),
-            b'Arthur Dent')
-        # In standard Plone we get a string encoded with utf-8.
+            'Arthur Dent')
+
+        # Now test non-ascii: Arthür with an accented u.
+        if isinstance('', bytes):
+            # On Python 2 we expect a string encoded with utf-8.
+            arthur = 'Arth\xc3\xbcr'
+        else:
+            # On Python 3 we expect a native string.
+            arthur = 'Arth\xfcr'
+
+        self.assertEqual(
+            combine_values([b'Arth\xc3\xbcr', b'Dent']),
+            arthur + ' Dent')
+        self.assertTrue(isinstance(combine_values([b'Arth\xc3\xbcr']), str))
         self.assertEqual(
             combine_values([u'Arth\xfcr', u'Dent']),
-            b'Arth\xc3\xbcr Dent')
-        self.assertTrue(isinstance(combine_values([u'Arth\xfcr']), six.binary_type))
+            arthur + ' Dent')
+        self.assertTrue(isinstance(combine_values([u'Arth\xfcr']), str))
+
         # We can combine more than three.
         self.assertEqual(
             combine_values(['', 'Hello,', 'Maurits', '   ' 'van', 'Rees']),
-            b'Hello, Maurits van Rees')
+            'Hello, Maurits van Rees')
         # And they can be unicode / encoded string / ascii string.
         self.assertEqual(
-            combine_values([b'Dent', u'Arth\xfcr', u'Dent', b'Arth\xc3\xbcr']),
-            b'Dent Arth\xc3\xbcr Dent Arth\xc3\xbcr')
+            combine_values([b'Dent', u'Arth\xfcr', u'Dent', b'Arth\xc3\xbcr', arthur]),
+            'Dent {0} Dent {0} {0}'.format(arthur))
 
     def test_get_userid(self):
         from pas.plugins.headers.plugins import HeaderPlugin
@@ -258,20 +275,20 @@ class HeaderPluginUnitTests(unittest.TestCase):
         plugin._get_all_header_properties(request)
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': b'',
-             'rol': b'',
-             'schoolbrin': b'',
-             'uid': b'',
+            {'fullname': '',
+             'rol': '',
+             'schoolbrin': '',
+             'uid': '',
              })
-        request.addHeader('EA_PROFILE_foo', b'bar')
-        request.addHeader('EA_PROFILE_firstname', b'Maurits')
-        request.addHeader('EA_PROFILE_middlename', b'van')
+        request.addHeader('EA_PROFILE_foo', 'bar')
+        request.addHeader('EA_PROFILE_firstname', 'Maurits')
+        request.addHeader('EA_PROFILE_middlename', 'van')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': b'Maurits van',
-             'rol': b'',
-             'schoolbrin': b'',
-             'uid': b'',
+            {'fullname': 'Maurits van',
+             'rol': '',
+             'schoolbrin': '',
+             'uid': '',
              })
         request.addHeader('EA_PROFILE_lastname', 'Rees')
         request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
@@ -279,21 +296,21 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': b'Maurits van Rees',
+            {'fullname': 'Maurits van Rees',
              'rol': 'docent',
              'schoolbrin': 'AA44ZT',
              'uid': 'my uid',
              })
-        request.addHeader('EA_PROFILE_lastname', b'Rees')
-        request.addHeader('EA_PROFILE_schoolbrin', b'AA44ZT')
-        request.addHeader(auth_header, b'my uid')
-        request.addHeader(roles_header, b'docent')
+        request.addHeader('EA_PROFILE_lastname', 'Rees')
+        request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
+        request.addHeader(auth_header, 'my uid')
+        request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': b'Maurits van Rees',
-             'rol': b'docent',
-             'schoolbrin': b'AA44ZT',
-             'uid': b'my uid',
+            {'fullname': 'Maurits van Rees',
+             'rol': 'docent',
+             'schoolbrin': 'AA44ZT',
+             'uid': 'my uid',
              })
 
         # Whitespace within a header is kept.
@@ -425,10 +442,10 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(auth_header, 'maurits')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': b'',
-             'rol': b'',
-             'schoolbrin': b'',
-             'uid': u'maurits'})
+            {'fullname': '',
+             'rol': '',
+             'schoolbrin': '',
+             'uid': 'maurits'})
         request.addHeader('EA_PROFILE_firstname', 'Maurits')
         request.addHeader('EA_PROFILE_middlename', 'van')
         request.addHeader('EA_PROFILE_lastname', 'Rees')
@@ -436,14 +453,14 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': b'Maurits van Rees',
+            {'fullname': 'Maurits van Rees',
              'rol': 'docent',
              'schoolbrin': 'AA44ZT',
              'uid': 'maurits'})
         request.addHeader(roles_header, '  LEERling  \t ')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': b'Maurits van Rees',
+            {'fullname': 'Maurits van Rees',
              'rol': 'leerling',
              'schoolbrin': 'AA44ZT',
              'uid': 'maurits'})
