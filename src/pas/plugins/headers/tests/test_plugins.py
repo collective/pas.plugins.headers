@@ -363,6 +363,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
         # Check the response.
         out.seek(0)
+        # Yes, this must be bytes, not 'str' on Python 3.
         self.assertIn(
             b'ERROR: denying any unauthorized access.',
             out.read())

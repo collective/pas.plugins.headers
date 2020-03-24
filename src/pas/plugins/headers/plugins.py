@@ -122,7 +122,8 @@ class HeaderPlugin(BasePlugin):
         A challenge is only tried when you are unauthorized.
         """
         if self.deny_unauthorized:
-            # We do not give the user a change to login.
+            # We do not give the user a chance to login.
+            # Yes, this must be bytes, not 'str' on Python 3.
             response.write(
                 b'ERROR: denying any unauthorized access.\n')
             return True
