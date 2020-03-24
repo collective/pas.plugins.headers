@@ -45,7 +45,7 @@ setup(
         'Products.GenericSetup>=1.8.2',
         'Products.PluggableAuthService',
         'setuptools',
-        'six',
+        'six>=1.12.0',
     ],
     extras_require={
         'test': [

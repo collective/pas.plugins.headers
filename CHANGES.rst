@@ -5,6 +5,10 @@ Changelog
 1.2.1 (unreleased)
 ------------------
 
+- We require ``six>=1.12.0`` because we use ``ensure_str``.
+  Note that Plone 4.3 and 5.1 currently pin older versions.
+  [maurits]
+
 - Fixed NotFound error when redirect_url started with a slash, for example ``/headerlogin``.
   In local development it would redirect to /headerlogin on the Zope root, where it does not exist.
   We now always treat the redirect_url as relative to the Plone site root, unless it is a full url.
