@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from .parsers import parse
+from .utils import safe_make_string
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
+from plone import api
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin  # noqa
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
@@ -45,10 +47,10 @@ def combine_values(values):
     Expected use is for getting a fullname from several values.
 
     For a standard Plone user, member.getProperty('fullname')
-    returns an encoded string.  So *no* unicode.
+    returns a string.  So text on Py 3, bytes on Py 2.
     """
     if not isinstance(values, (list, tuple)):
-        return b''
+        return ''
     # filter out empty values.
     values = filter(None, values)
     # Turn values into unicode so we can safely combine them.
@@ -56,8 +58,10 @@ def combine_values(values):
     # again filter out empty values
     values = filter(None, values)
     full = u' '.join(values)
-    # Encode the result.
-    return full.encode('utf-8')
+    # Encode the result to string on Python 2.
+    if six.PY2:
+        return full.encode('utf-8')
+    return full
 
 
 class HeaderPlugin(BasePlugin):
@@ -119,12 +123,21 @@ class HeaderPlugin(BasePlugin):
         A challenge is only tried when you are unauthorized.
         """
         if self.deny_unauthorized:
-            # We do not give the user a change to login.
+            # We do not give the user a chance to login.
+            # Yes, this must be bytes, not 'str' on Python 3.
             response.write(
                 b'ERROR: denying any unauthorized access.\n')
             return True
         if self.redirect_url:
-            url = '{}?came_from={}'.format(self.redirect_url, request.URL)
+            url = self.redirect_url
+            # If url is headerlogin, we want localhost:8080/Plone/headerlogin
+            # and not localhost:8080/Plone/current-folder/headerlogin.
+            # So relative from the site root.
+            # Or from the navigation root, but that needs a context, which we don't have here.
+            # Watch out for '//some.domain' as external redirect url.
+            if '//' not  in url:
+                url = api.portal.get().absolute_url() + url
+            url = '{}?came_from={}'.format(url, request.URL)
             logger.warning('Redirecting to %s', url)
             response.redirect(url, lock=1)
             return True
@@ -324,7 +337,7 @@ class HeaderPlugin(BasePlugin):
             return result
         for member_prop, headers, parser in self._parse_memberdata_to_header():
             values = [
-                request.getHeader(header_prop, b'').strip()
+                request.getHeader(header_prop, '').strip()
                 for header_prop in headers]
             if parser is not None:
                 values = [parse(parser, value) for value in values]
