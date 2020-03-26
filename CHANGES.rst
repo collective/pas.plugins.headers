@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.3.0 (unreleased)
+1.3.0 (2020-03-26)
 ------------------
 
 - We require ``six>=1.12.0`` because we use ``ensure_str``.
