@@ -246,6 +246,15 @@ class TestFull(unittest.TestCase):
         self.browser.open(self.portal_url + '/@@overview-controlpanel')
         self.assertEqual(self.browser.url, self.portal_url + '/login')
 
+    def test_redirect_url_bytes(self):
+        # The redirect url is expected to be a native string both on Py 2 and 3,
+        # but I have seen it as bytes on Py 3 in a traceback.
+        self.plugin.redirect_url = b'headerlogin'
+        transaction.commit()
+        self.browser.handleErrors = True
+        self.browser.open(self.portal_url + '/@@overview-controlpanel')
+        self.assertEqual(self.browser.url, self.portal_url + '/login')
+
     def test_redirect_came_from_login(self):
         # If we came from a login-related form and are still anonymous,
         # we should not redirect back.  We want to avoid redirect loops.

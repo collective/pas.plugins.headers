@@ -130,6 +130,10 @@ class HeaderPlugin(BasePlugin):
             return True
         if self.redirect_url:
             url = self.redirect_url
+            # url is expected to be a native string both on Py 2 and 3,
+            # but I have seen it as bytes on Py 3 in a traceback.
+            if six.PY3 and isinstance(url, bytes):
+                url = url.decode('utf-8')
             # If url is headerlogin, we want localhost:8080/Plone/headerlogin
             # and not localhost:8080/Plone/current-folder/headerlogin.
             # So relative from the site root.
