@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.3.1 (unreleased)
+1.3.1 (2020-04-03)
 ------------------
 
 - Python 3: when ``redirect_url`` unexpectedly is bytes, turn it into native string before comparing.
