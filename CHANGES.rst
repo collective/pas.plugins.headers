@@ -5,7 +5,12 @@ Changelog
 1.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Python 3: when ``redirect_url`` unexpectedly is bytes, turn it into native string before comparing.
+  [maurits]
+
+- Fixed problem with ``redirect_url`` not starting with a slash.
+  With ``headerlogin`` as value we would redirect to http://localhost:8080/Ploneheaderlogin.
+  [maurits]
 
 
 1.3.0 (2020-03-26)
