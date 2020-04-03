@@ -229,6 +229,23 @@ class TestFull(unittest.TestCase):
         self.browser.open(self.portal_url + '/@@overview-controlpanel')
         self.assertEqual(self.browser.url, self.portal_url + '/login')
 
+    def test_redirect_url_no_slash(self):
+        # The test setUp uses /headerlogin.  Now test without a slash.
+        self.plugin.redirect_url = 'headerlogin'
+        transaction.commit()
+        self.browser.handleErrors = True
+        self.browser.open(self.portal_url + '/@@overview-controlpanel')
+        self.assertEqual(self.browser.url, self.portal_url + '/login')
+
+    def test_redirect_url_double_slash(self):
+        # The test setUp uses /headerlogin.  Now test with double slash.
+        # Easiest is to take //nohost/plone/headerlogin without http or https.
+        self.plugin.redirect_url = '//' + self.portal_url.split('//')[1] + '/headerlogin'
+        transaction.commit()
+        self.browser.handleErrors = True
+        self.browser.open(self.portal_url + '/@@overview-controlpanel')
+        self.assertEqual(self.browser.url, self.portal_url + '/login')
+
     def test_redirect_came_from_login(self):
         # If we came from a login-related form and are still anonymous,
         # we should not redirect back.  We want to avoid redirect loops.

@@ -136,6 +136,9 @@ class HeaderPlugin(BasePlugin):
             # Or from the navigation root, but that needs a context, which we don't have here.
             # Watch out for '//some.domain' as external redirect url.
             if '//' not  in url:
+                if not url.startswith('/'):
+                    # Avoid getting .../Ploneheaderlogin as url.
+                    url = '/' + url
                 url = api.portal.get().absolute_url() + url
             url = '{}?came_from={}'.format(url, request.URL)
             logger.warning('Redirecting to %s', url)
