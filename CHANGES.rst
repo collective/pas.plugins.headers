@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.3.2 (unreleased)
+1.3.2 (2021-12-02)
 ------------------
 
 - Add tox.ini, use GitHub Actions, test with Plone 4.3, 5.1, 5.2, 6.0.
