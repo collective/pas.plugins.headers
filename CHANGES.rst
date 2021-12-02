@@ -5,7 +5,8 @@ Changelog
 1.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add tox.ini, use GitHub Actions, test with Plone 4.3, 5.1, 5.2, 6.0.
+  [maurits]
 
 
 1.3.1 (2020-04-03)
