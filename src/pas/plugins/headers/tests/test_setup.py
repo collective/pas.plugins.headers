@@ -29,8 +29,13 @@ class TestSetup(unittest.TestCase):
 
     def test_product_installed(self):
         """Test if pas.plugins.headers is installed."""
-        self.assertTrue(self.installer.isProductInstalled(
-            'pas.plugins.headers'))
+        if hasattr(self.installer, "is_product_installed"):
+            installed = self.installer.is_product_installed(
+                'pas.plugins.headers')
+        else:
+            installed = self.installer.isProductInstalled(
+                'pas.plugins.headers')
+        self.assertTrue(installed)
 
     def test_plugin_added(self):
         """Test if the plugin is added to acl_users."""
@@ -73,13 +78,21 @@ class TestUninstall(unittest.TestCase):
         self.installer = get_installer(self.portal)
         roles_before = api.user.get_roles(TEST_USER_ID)
         setRoles(self.portal, TEST_USER_ID, ['Manager'])
-        self.installer.uninstallProducts(['pas.plugins.headers'])
+        if hasattr(self.installer, "uninstall_product"):
+            self.installer.uninstall_product('pas.plugins.headers')
+        else:
+            self.installer.uninstallProducts(['pas.plugins.headers'])
         setRoles(self.portal, TEST_USER_ID, roles_before)
 
     def test_product_uninstalled(self):
         """Test if pas.plugins.headers is cleanly uninstalled."""
-        self.assertFalse(self.installer.isProductInstalled(
-            'pas.plugins.headers'))
+        if hasattr(self.installer, "is_product_installed"):
+            installed = self.installer.is_product_installed(
+                'pas.plugins.headers')
+        else:
+            installed = self.installer.isProductInstalled(
+                'pas.plugins.headers')
+        self.assertFalse(installed)
 
     def test_plugin_removed(self):
         """Test if the plugin is removed from acl_users."""
