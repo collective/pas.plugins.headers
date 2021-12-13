@@ -5,7 +5,12 @@ Changelog
 1.3.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added option ``default_roles``.
+  These roles are given when a user is successfully authenticated by this plugin.
+  You always automatically get the Authenticated role.
+  But you may want to give everyone the Member role.
+  This is not checked against the allowed roles.
+  [maurits]
 
 
 1.3.2 (2021-12-02)

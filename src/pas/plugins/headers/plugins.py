@@ -83,6 +83,7 @@ class HeaderPlugin(BasePlugin):
     redirect_url = ''
     memberdata_to_header = ()
     create_ticket = False
+    default_roles = ()
     _properties = (
         dict(id='userid_header', type='string', mode='w',
              label='Header to use as user id'),
@@ -107,6 +108,9 @@ class HeaderPlugin(BasePlugin):
         dict(id='create_ticket', type='boolean', mode='w',
              label='Create authentication ticket. '
                    'Then headers need not be checked on all urls.'),
+        dict(id='default_roles', type='lines', mode='w',
+             label='Default roles',
+             ),
     )
 
     def challenge(self, request, response):
@@ -262,17 +266,20 @@ class HeaderPlugin(BasePlugin):
         result = []
         if request is None:
             return result
-        if not self.roles_header:
+        if not (self.roles_header or self.default_roles):
             return result
         user_id = principal.getUserId()
         if self._get_userid(request) != user_id:
             return result
+        if self.default_roles:
+            # Most likely: Member.
+            result = list(self.default_roles)
         roles = request.getHeader(self.roles_header)
         if not roles:
             return result
         roles = roles.split()
         if not self.allowed_roles:
-            return roles
+            return sorted(set(result + roles))
         # Check roles against the allowed roles.
         # Compare them lowercase.
         # In the result we should only have the spelling from allowed_roles.
@@ -290,7 +297,7 @@ class HeaderPlugin(BasePlugin):
                 logger.debug('Ignoring disallowed role in header: %s', role)
                 continue
             result.append(canonical_role)
-        return result
+        return sorted(result)
 
     def _get_userid(self, request):
         """Get userid property from the request headers."""

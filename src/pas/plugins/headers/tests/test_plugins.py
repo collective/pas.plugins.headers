@@ -183,7 +183,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(roles_header, '  one two three   ')
         self.assertEqual(
             plugin.getRolesForPrincipal(user, request),
-            ['one', 'two', 'three'])
+            ['one', 'three', 'two'])
         # We can restrict the roles that we take over.
         plugin.allowed_roles = ('one', 'three')
         self.assertEqual(
@@ -198,8 +198,16 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(
             plugin.getRolesForPrincipal(user, request),
             ['One', 'THRee'])
-        # If we unset the roles_header, no roles are found.
+        # We may have default roles, when the automatic Authenticated role
+        # is not enough.
+        plugin.default_roles = ('Member',)
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['Member', 'One', 'THRee'])
+        plugin.default_roles = ('Member', 'Raccoon')
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['Member', 'One', 'Raccoon', 'THRee'])
+        # If we unset the roles_header, no roles are found, except the default roles.
         plugin.roles_header = ''
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['Member', 'Raccoon'])
+        plugin.default_roles = ()
         self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
 
     def test_parse_memberdata_to_header(self):

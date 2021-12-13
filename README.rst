@@ -110,7 +110,7 @@ These are the properties that you can edit:
     You can also combine several headers:
     ``propname|header_with_firstname header_with_lastname``.
 
-``create_ticket``.
+``create_ticket``:
   Create an authentication ticket (``__ac`` cookie) with ``plone.session``.
   Default: false.
   When reading headers, this checks if Plone knows this user.
@@ -118,6 +118,12 @@ These are the properties that you can edit:
   Then you could let your frontend server (nginx, Apache) only set the headers for some urls, instead of for all.
   Note that this does not work for root Zope users, and it does not take over properties and roles.
   See also `issue 6 <https://github.com/collective/pas.plugins.headers/issues/6>`_.
+
+``default_roles``:
+  Default roles to add when a user is successfully authenticated by this plugin.
+  You always automatically get the Authenticated role.
+  But you may want to give everyone the Member role.
+  This is not checked against the allowed roles.
 
 
 Configuration via GenericSetup
@@ -137,6 +143,9 @@ Full example:
             "Zebra"
         ],
         "create_ticket": true,
+        "default_roles": [
+            "Member"
+        ],
         "deny_unauthorized": true,
         "memberdata_to_header": [
             "uid|HEADER_uid|lower",
