@@ -14,7 +14,7 @@ long_description = '\n\n'.join([
 
 setup(
     name='pas.plugins.headers',
-    version='1.3.3.dev0',
+    version='1.4.0.dev0',
     description="PAS plugin for authentication based on request headers",
     long_description=long_description,
     # Get more from https://pypi.org/classifiers/
