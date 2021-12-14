@@ -294,6 +294,7 @@ class TestExport(ExportImportBaseTestCase):
             """{
 "allowed_roles": [],
 "create_ticket": false,
+"default_roles": [],
 "deny_unauthorized": false,
 "memberdata_to_header": [],
 "redirect_url": "",
@@ -306,6 +307,7 @@ class TestExport(ExportImportBaseTestCase):
             json.loads(context.get_exported_data()),
             {
                 'allowed_roles': [],
+                'default_roles': [],
                 'deny_unauthorized': False,
                 'create_ticket': False,
                 'memberdata_to_header': [],
@@ -328,6 +330,7 @@ class TestExport(ExportImportBaseTestCase):
             json.loads(context.get_exported_data()),
             {
                 'allowed_roles': ['root'],
+                'default_roles': [],
                 'deny_unauthorized': True,
                 'create_ticket': True,
                 'memberdata_to_header': ['foo|bar'],
