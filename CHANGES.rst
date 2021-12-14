@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.4.0 (unreleased)
+1.4.0 (2021-12-14)
 ------------------
 
 - Added option ``default_roles``.
