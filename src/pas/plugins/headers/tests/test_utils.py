@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING  # noqa
+from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
 from plone import api
 
 import unittest

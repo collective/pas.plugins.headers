@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from .parsers import parse
-from .utils import safe_make_string
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
 from plone import api

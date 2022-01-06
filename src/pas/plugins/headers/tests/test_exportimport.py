@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """Setup tests for this package."""
-from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING  # noqa
+from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
 from pas.plugins.headers.utils import get_plugin
 
 import json
-import six
 import unittest
 
 
