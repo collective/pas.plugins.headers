@@ -47,7 +47,10 @@ class TestHeaderLogin(unittest.TestCase):
     def test_redirect_basic_auth(self):
         self.browser.addHeader(
             'Authorization',
-            'Basic {0}:{1}'.format(SITE_OWNER_NAME, SITE_OWNER_PASSWORD,)
+            'Basic {0}:{1}'.format(
+                SITE_OWNER_NAME,
+                SITE_OWNER_PASSWORD,
+            ),
         )
         self.browser.open(self.portal_url + '/headerlogin')
         self.assertEqual(self.browser.url, self.portal_url)
@@ -62,15 +65,25 @@ class TestHeaderLogin(unittest.TestCase):
     def test_redirect_came_from_good(self):
         self.browser.addHeader(
             'Authorization',
-            'Basic {0}:{1}'.format(SITE_OWNER_NAME, SITE_OWNER_PASSWORD,)
+            'Basic {0}:{1}'.format(
+                SITE_OWNER_NAME,
+                SITE_OWNER_PASSWORD,
+            ),
         )
-        self.browser.open('{}/headerlogin?came_from={}/view'.format(self.portal_url, self.portal_url))
+        self.browser.open(
+            '{}/headerlogin?came_from={}/view'.format(self.portal_url, self.portal_url)
+        )
         self.assertEqual(self.browser.url, self.portal_url + '/view')
 
     def test_redirect_came_from_bad(self):
         self.browser.addHeader(
             'Authorization',
-            'Basic {0}:{1}'.format(SITE_OWNER_NAME, SITE_OWNER_PASSWORD,)
+            'Basic {0}:{1}'.format(
+                SITE_OWNER_NAME,
+                SITE_OWNER_PASSWORD,
+            ),
         )
-        self.browser.open(self.portal_url + '/headerlogin?came_from=http://attacker.com')
+        self.browser.open(
+            self.portal_url + '/headerlogin?came_from=http://attacker.com'
+        )
         self.assertEqual(self.browser.url, self.portal_url)

@@ -24,23 +24,31 @@ class TestAuthTicket(unittest.TestCase):
         self.session = self.pas.session
 
     def test_auth_unknown_user(self):
-        self.assertEqual(self.plugin.authenticateCredentials({
-            'user_id': 'joe', 'extractor': PLUGIN_ID
-        }), ('joe', 'joe'))
+        self.assertEqual(
+            self.plugin.authenticateCredentials(
+                {'user_id': 'joe', 'extractor': PLUGIN_ID}
+            ),
+            ('joe', 'joe'),
+        )
         response = self.portal.REQUEST.response
         self.assertNotIn('__ac', response.cookies)
 
     def test_auth_known_user(self):
-        self.assertEqual(self.plugin.authenticateCredentials({
-            'user_id': TEST_USER_ID, 'extractor': PLUGIN_ID
-        }), (TEST_USER_ID, TEST_USER_ID))
+        self.assertEqual(
+            self.plugin.authenticateCredentials(
+                {'user_id': TEST_USER_ID, 'extractor': PLUGIN_ID}
+            ),
+            (TEST_USER_ID, TEST_USER_ID),
+        )
         request = self.portal.REQUEST
         response = request.response
         self.assertIn('__ac', response.cookies)
         cookie = response.cookies['__ac']
         value = cookie.pop('value', None)
         self.assertIsNotNone(value)
-        self.assertDictEqual(cookie, {'path': '/', 'secure': False, 'http_only': True, 'quoted': True})
+        self.assertDictEqual(
+            cookie, {'path': '/', 'secure': False, 'http_only': True, 'quoted': True}
+        )
 
         # Now set the cookie from the response on the request,
         # and see if plone.session can read it.

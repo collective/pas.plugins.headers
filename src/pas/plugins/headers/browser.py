@@ -6,31 +6,32 @@ from zExceptions import Forbidden
 
 
 # List taken over from browser/login/login.py in CMFPlone 5.2.
-LOGIN_TEMPLATE_IDS = set([
-    'localhost',
-    'logged-out',
-    'logged_in',
-    'login',
-    'login_failed',
-    'login_form',
-    'login_password',
-    'login_success',
-    'logout',
-    'mail_password',
-    'mail_password_form',
-    'member_search_results',
-    'pwreset_finish',
-    'passwordreset',
-    'register',
-    'registered',
-    'require_login',
-    # Extra for us:
-    'headerlogin',
-])
+LOGIN_TEMPLATE_IDS = set(
+    [
+        'localhost',
+        'logged-out',
+        'logged_in',
+        'login',
+        'login_failed',
+        'login_form',
+        'login_password',
+        'login_success',
+        'logout',
+        'mail_password',
+        'mail_password_form',
+        'member_search_results',
+        'pwreset_finish',
+        'passwordreset',
+        'register',
+        'registered',
+        'require_login',
+        # Extra for us:
+        'headerlogin',
+    ]
+)
 
 
 class HeaderLogin(BrowserView):
-
     def get_came_from(self, include_login_templates=False):
         came_from = self.request.get('came_from', None)
         if not came_from:

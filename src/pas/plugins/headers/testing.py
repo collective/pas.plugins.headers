@@ -8,7 +8,6 @@ import pas.plugins.headers
 
 
 class PasPluginsHeadersLayer(PloneSandboxLayer):
-
     def setUpZope(self, app, configurationContext):
         # Load any other ZCML that is required for your tests.
         # The z3c.autoinclude feature is disabled in the Plone fixture base

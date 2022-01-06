@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 @implementer(INonInstallable)
 class HiddenProfiles(object):
-
     def getNonInstallableProfiles(self):  # pragma: no cover
         """Hide uninstall profile from site-creation and quickinstaller."""
         return [
@@ -37,7 +36,8 @@ def post_install(context):
     plugin = getattr(pas, PLUGIN_ID)
     if not isinstance(plugin, HeaderPlugin):
         raise ValueError(
-            'Existing PAS plugin {0} is not a HeaderPlugin.'.format(PLUGIN_ID))
+            'Existing PAS plugin {0} is not a HeaderPlugin.'.format(PLUGIN_ID)
+        )
 
     # Activate all supported interfaces for this plugin.
     activate = []
@@ -48,8 +48,8 @@ def post_install(context):
         if plugin.testImplements(interface):
             activate.append(interface_name)
             logger.info(
-                'Activating interface %s for plugin %s',
-                interface_name, info['title'])
+                'Activating interface %s for plugin %s', interface_name, info['title']
+            )
 
     plugin.manage_activateInterfaces(activate)
     logger.info('Plugins activated.')
@@ -68,16 +68,19 @@ def post_install(context):
 def uninstall(context):
     """Uninstall script"""
     from pas.plugins.headers.utils import PLUGIN_ID
+
     pas = getToolByName(context, 'acl_users')
 
     # Remove plugin if it exists.
     if PLUGIN_ID not in pas.objectIds():
         return
     from pas.plugins.headers.plugins import HeaderPlugin
+
     plugin = getattr(pas, PLUGIN_ID)
     if not isinstance(plugin, HeaderPlugin):
         logger.warning(
-            'PAS plugin %s not removed: it is not a HeaderPlugin.', PLUGIN_ID)
+            'PAS plugin %s not removed: it is not a HeaderPlugin.', PLUGIN_ID
+        )
         return
     pas._delObject(PLUGIN_ID)
     logger.info('Removed HeaderPlugin %s from acl_users.', PLUGIN_ID)

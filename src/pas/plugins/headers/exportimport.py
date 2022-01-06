@@ -11,8 +11,7 @@ FILENAME = 'pas.plugins.headers.json'
 
 
 def import_properties(context):
-    """Import HeaderPlugin properties.
-    """
+    """Import HeaderPlugin properties."""
     site = context.getSite()
     body = context.readDataFile(FILENAME)
     logger = context.getLogger(PLUGIN_ID)
@@ -28,8 +27,7 @@ def import_properties(context):
     if not isinstance(props, dict):
         # logger.error('%s does not contain a json dictionary.', FILENAME)
         # return
-        raise ValueError(
-            '{0} does not contain a json dictionary.'.format(FILENAME))
+        raise ValueError('{0} does not contain a json dictionary.'.format(FILENAME))
     purge = props.pop('purge', False)
     if purge:
         for prop_name in plugin.propertyIds():
@@ -51,8 +49,7 @@ def import_properties(context):
 
 
 def export_properties(context):
-    """Export HeaderPlugin properties.
-    """
+    """Export HeaderPlugin properties."""
     site = context.getSite()
     logger = context.getLogger(PLUGIN_ID)
     plugin = get_plugin(site)

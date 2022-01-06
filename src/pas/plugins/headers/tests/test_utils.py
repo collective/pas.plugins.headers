@@ -16,12 +16,14 @@ class TestGetPlugin(unittest.TestCase):
 
     def test_get_plugin_no_pas(self):
         from pas.plugins.headers.utils import get_plugin
+
         self.portal._delObject('acl_users')
         self.assertIsNone(get_plugin(self.portal))
 
     def test_get_plugin_removed(self):
         from pas.plugins.headers.utils import get_plugin
         from pas.plugins.headers.utils import PLUGIN_ID
+
         pas = api.portal.get_tool('acl_users')
         pas._delObject(PLUGIN_ID)
         self.assertIsNone(get_plugin(self.portal))
@@ -30,6 +32,7 @@ class TestGetPlugin(unittest.TestCase):
         from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
         from pas.plugins.headers.utils import PLUGIN_ID
         from pas.plugins.headers.utils import get_plugin
+
         pas = api.portal.get_tool('acl_users')
         pas._delObject(PLUGIN_ID)
         pas._setObject(PLUGIN_ID, BasePlugin())
@@ -39,6 +42,7 @@ class TestGetPlugin(unittest.TestCase):
         from pas.plugins.headers.utils import get_plugin
         from pas.plugins.headers.utils import PLUGIN_ID
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = get_plugin(self.portal)
         self.assertIsNotNone(plugin)
         self.assertEqual(plugin.id, PLUGIN_ID)
@@ -67,7 +71,9 @@ class TestSafeMakeString(unittest.TestCase):
         self.assertEqual(safe_make_string(expected), expected)
         self.assertEqual(safe_make_string(u'\xeb'), expected)
 
-        self.assertEqual(safe_make_string([1, b'two', 'three', u'four']), [1, 'two', 'three', 'four'])
+        self.assertEqual(
+            safe_make_string([1, b'two', 'three', u'four']), [1, 'two', 'three', 'four']
+        )
 
         self.assertEqual(safe_make_string(0), 0)
         self.assertEqual(safe_make_string(None), None)

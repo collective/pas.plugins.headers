@@ -3,9 +3,9 @@ import unittest
 
 
 class ParsersUnitTests(unittest.TestCase):
-
     def test_boolean(self):
         from pas.plugins.headers.parsers import _boolean
+
         self.assertEqual(_boolean(None), False)
         self.assertEqual(_boolean(0), False)
         self.assertEqual(_boolean(1), True)
@@ -37,6 +37,7 @@ class ParsersUnitTests(unittest.TestCase):
 
     def test_int(self):
         from pas.plugins.headers.parsers import _int
+
         self.assertEqual(_int(None), 0)
         self.assertEqual(_int(0), 0)
         self.assertEqual(_int(1), 1)
@@ -59,6 +60,7 @@ class ParsersUnitTests(unittest.TestCase):
 
     def test_lower(self):
         from pas.plugins.headers.parsers import _lower
+
         self.assertEqual(_lower(None), '')
         self.assertEqual(_lower(0), '')
         self.assertEqual(_lower(1), '')
@@ -76,6 +78,7 @@ class ParsersUnitTests(unittest.TestCase):
 
     def test_upper(self):
         from pas.plugins.headers.parsers import _upper
+
         self.assertEqual(_upper(None), '')
         self.assertEqual(_upper(0), '')
         self.assertEqual(_upper(1), '')
@@ -93,6 +96,7 @@ class ParsersUnitTests(unittest.TestCase):
 
     def test_split(self):
         from pas.plugins.headers.parsers import _split
+
         self.assertEqual(_split(None), [])
         self.assertEqual(_split(0), [])
         self.assertEqual(_split(1), [])
@@ -110,6 +114,7 @@ class ParsersUnitTests(unittest.TestCase):
 
     def test_parse(self):
         from pas.plugins.headers.parsers import parse
+
         self.assertEqual(parse(None, 'Value'), 'Value')
         self.assertEqual(parse('bool', 'Value'), False)
         self.assertEqual(parse('int', 'Value'), 0)
@@ -141,6 +146,7 @@ class ParsersUnitTests(unittest.TestCase):
             return value.no_such_attribute
 
         from pas.plugins.headers.parsers import register_parser
+
         register_parser('simple', simple_lower)
         self.assertEqual(parse('simple', 'foo'), 'foo')
 

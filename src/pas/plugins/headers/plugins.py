@@ -4,7 +4,9 @@ from .utils import safe_make_string
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
 from plone import api
-from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin  # noqa
+from Products.PluggableAuthService.interfaces.plugins import (
+    IAuthenticationPlugin,
+)  # noqa
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
 from Products.PluggableAuthService.interfaces.plugins import ICredentialsResetPlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
@@ -87,39 +89,66 @@ class HeaderPlugin(BasePlugin):
     default_roles = ()
     cookies_removed_on_logout = ()
     _properties = (
-        dict(id='userid_header', type='string', mode='w',
-             label='Header to use as user id'),
-        dict(id='roles_header', type='string', mode='w',
-             label='Header to use as roles'),
-        dict(id='allowed_roles', type='lines', mode='w',
-             label='Allowed roles'),
-        dict(id='required_headers', type='lines', mode='w',
-             label='Required headers',
-             # Note: description is currently not shown anywhere in the ZMI.
-             description='Without these, the plugin does not authenticate.',
-             ),
-        dict(id='deny_unauthorized', type='boolean', mode='w',
-             label='Deny unauthorized access. '
-                   'Do not redirect to a login form.'),
-        dict(id='redirect_url', type='string', mode='w',
-             label='URL to redirect to when unauthorized'),
-        dict(id='memberdata_to_header', type='lines', mode='w',
-             label='Mapping from memberdata property to request header. '
-                   'Format: propname|header1 header2',
-             ),
-        dict(id='create_ticket', type='boolean', mode='w',
-             label='Create authentication ticket. '
-                   'Then headers need not be checked on all urls.'),
-        dict(id='default_roles', type='lines', mode='w',
-             label='Default roles',
-             ),
-        dict(id='cookies_removed_on_logout', type='lines', mode='w',
-             label='Cookies to remove on logout',
-             ),
+        dict(
+            id='userid_header',
+            type='string',
+            mode='w',
+            label='Header to use as user id',
+        ),
+        dict(
+            id='roles_header', type='string', mode='w', label='Header to use as roles'
+        ),
+        dict(id='allowed_roles', type='lines', mode='w', label='Allowed roles'),
+        dict(
+            id='required_headers',
+            type='lines',
+            mode='w',
+            label='Required headers',
+            # Note: description is currently not shown anywhere in the ZMI.
+            description='Without these, the plugin does not authenticate.',
+        ),
+        dict(
+            id='deny_unauthorized',
+            type='boolean',
+            mode='w',
+            label='Deny unauthorized access. ' 'Do not redirect to a login form.',
+        ),
+        dict(
+            id='redirect_url',
+            type='string',
+            mode='w',
+            label='URL to redirect to when unauthorized',
+        ),
+        dict(
+            id='memberdata_to_header',
+            type='lines',
+            mode='w',
+            label='Mapping from memberdata property to request header. '
+            'Format: propname|header1 header2',
+        ),
+        dict(
+            id='create_ticket',
+            type='boolean',
+            mode='w',
+            label='Create authentication ticket. '
+            'Then headers need not be checked on all urls.',
+        ),
+        dict(
+            id='default_roles',
+            type='lines',
+            mode='w',
+            label='Default roles',
+        ),
+        dict(
+            id='cookies_removed_on_logout',
+            type='lines',
+            mode='w',
+            label='Cookies to remove on logout',
+        ),
     )
 
     def challenge(self, request, response):
-        """ Assert via the response that credentials will be gathered.
+        """Assert via the response that credentials will be gathered.
 
         For IChallengePlugin.
 
@@ -134,8 +163,7 @@ class HeaderPlugin(BasePlugin):
         if self.deny_unauthorized:
             # We do not give the user a chance to login.
             # Yes, this must be bytes, not 'str' on Python 3.
-            response.write(
-                b'ERROR: denying any unauthorized access.\n')
+            response.write(b'ERROR: denying any unauthorized access.\n')
             return True
         if self.redirect_url:
             url = self.redirect_url
@@ -148,7 +176,7 @@ class HeaderPlugin(BasePlugin):
             # So relative from the site root.
             # Or from the navigation root, but that needs a context, which we don't have here.
             # Watch out for '//some.domain' as external redirect url.
-            if '//' not  in url:
+            if '//' not in url:
                 if not url.startswith('/'):
                     # Avoid getting .../Ploneheaderlogin as url.
                     url = '/' + url
@@ -163,7 +191,7 @@ class HeaderPlugin(BasePlugin):
         return
 
     def extractCredentials(self, request):
-        """ request -> {...}
+        """request -> {...}
 
         For IExtractionPlugin.
 
@@ -184,7 +212,7 @@ class HeaderPlugin(BasePlugin):
         return creds
 
     def authenticateCredentials(self, credentials):
-        """ credentials -> (userid, login)
+        """credentials -> (userid, login)
 
         For IAuthenticationPlugin.
 
@@ -225,7 +253,7 @@ class HeaderPlugin(BasePlugin):
         logger.debug('Done setting up session/ticket for %s' % user_id)
 
     def getPropertiesForUser(self, user, request=None):
-        """ user -> {...}
+        """user -> {...}
 
         For IPropertiesPlugin.
 
@@ -255,7 +283,7 @@ class HeaderPlugin(BasePlugin):
         return self._get_all_header_properties(request)
 
     def getRolesForPrincipal(self, principal, request=None):
-        """ principal -> ( role_1, ... role_N )
+        """principal -> ( role_1, ... role_N )
 
         For IRolesPlugin.
 
@@ -386,8 +414,8 @@ class HeaderPlugin(BasePlugin):
             return result
         for member_prop, headers, parser in self._parse_memberdata_to_header():
             values = [
-                request.getHeader(header_prop, '').strip()
-                for header_prop in headers]
+                request.getHeader(header_prop, '').strip() for header_prop in headers
+            ]
             if parser is not None:
                 values = [parse(parser, value) for value in values]
             if len(values) == 1:

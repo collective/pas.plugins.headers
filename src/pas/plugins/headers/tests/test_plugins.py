@@ -29,7 +29,6 @@ class HeaderRequest(TestRequest):
 
 
 class DummyUser(object):
-
     def __init__(self, userid):
         self.userid = userid
 
@@ -38,10 +37,10 @@ class DummyUser(object):
 
 
 class HeaderPluginUnitTests(unittest.TestCase):
-
     def _makeOne(self):
         # Make a plugin and configure it like we used to have for one client.
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = HeaderPlugin()
         plugin.userid_header = 'EA_PROFILE_uid'
         plugin.required_headers = ('EA_PROFILE_uid', 'EA_PROFILE_role')
@@ -61,6 +60,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
     def test_decode_header(self):
         from pas.plugins.headers.plugins import decode_header
+
         self.assertEqual(decode_header(None), None)
         self.assertEqual(decode_header(''), u'')
         self.assertEqual(decode_header(b''), u'')
@@ -72,40 +72,28 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
     def test_combine_values(self):
         from pas.plugins.headers.plugins import combine_values
+
         self.assertEqual(combine_values(None), '')
         self.assertEqual(combine_values('My name'), '')
         self.assertEqual(combine_values({}), '')
         self.assertEqual(combine_values([]), '')
         self.assertEqual(combine_values(()), '')
-        self.assertEqual(combine_values(
-            [b'Maurits']),
-            'Maurits')
-        self.assertEqual(combine_values(
-            ['Maurits']),
-            'Maurits')
-        self.assertEqual(combine_values(
-            [u'Maurits']),
-            'Maurits')
+        self.assertEqual(combine_values([b'Maurits']), 'Maurits')
+        self.assertEqual(combine_values(['Maurits']), 'Maurits')
+        self.assertEqual(combine_values([u'Maurits']), 'Maurits')
         # On Python 2, 'Maurits' == u'Maurits' because both contain only ascii.
         # But we *do* want to know if we get unicode or bytes back.
         # Also, on Python 3 they are NOT the same at all.
         # In all cases we want a string.
         self.assertTrue(isinstance(combine_values(['Maurits']), str))
-        self.assertEqual(
-            combine_values(['Maurits', 'Rees']),
-            'Maurits Rees')
-        self.assertEqual(
-            combine_values(['Maurits', '', 'Rees']),
-            'Maurits Rees')
-        self.assertEqual(
-            combine_values(['Maurits', 'van', 'Rees']),
-            'Maurits van Rees')
+        self.assertEqual(combine_values(['Maurits', 'Rees']), 'Maurits Rees')
+        self.assertEqual(combine_values(['Maurits', '', 'Rees']), 'Maurits Rees')
+        self.assertEqual(combine_values(['Maurits', 'van', 'Rees']), 'Maurits van Rees')
         self.assertEqual(
             combine_values(['    Maurits\t\n\r  ', '  ', None, '    Rees \n']),
-            'Maurits Rees')
-        self.assertEqual(
-            combine_values((u'Arthur', u'Dent')),
-            'Arthur Dent')
+            'Maurits Rees',
+        )
+        self.assertEqual(combine_values((u'Arthur', u'Dent')), 'Arthur Dent')
 
         # Now test non-ascii: Arthür with an accented u.
         if isinstance('', bytes):
@@ -115,26 +103,25 @@ class HeaderPluginUnitTests(unittest.TestCase):
             # On Python 3 we expect a native string.
             arthur = 'Arth\xfcr'
 
-        self.assertEqual(
-            combine_values([b'Arth\xc3\xbcr', b'Dent']),
-            arthur + ' Dent')
+        self.assertEqual(combine_values([b'Arth\xc3\xbcr', b'Dent']), arthur + ' Dent')
         self.assertTrue(isinstance(combine_values([b'Arth\xc3\xbcr']), str))
-        self.assertEqual(
-            combine_values([u'Arth\xfcr', u'Dent']),
-            arthur + ' Dent')
+        self.assertEqual(combine_values([u'Arth\xfcr', u'Dent']), arthur + ' Dent')
         self.assertTrue(isinstance(combine_values([u'Arth\xfcr']), str))
 
         # We can combine more than three.
         self.assertEqual(
             combine_values(['', 'Hello,', 'Maurits', '   ' 'van', 'Rees']),
-            'Hello, Maurits van Rees')
+            'Hello, Maurits van Rees',
+        )
         # And they can be unicode / encoded string / ascii string.
         self.assertEqual(
             combine_values([b'Dent', u'Arth\xfcr', u'Dent', b'Arth\xc3\xbcr', arthur]),
-            'Dent {0} Dent {0} {0}'.format(arthur))
+            'Dent {0} Dent {0} {0}'.format(arthur),
+        )
 
     def test_get_userid(self):
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = HeaderPlugin()
         auth_header = 'SAML_id'
         self.assertEqual(plugin._get_userid(None), None)
@@ -150,6 +137,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
 
     def test_getRolesForPrincipal(self):
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = HeaderPlugin()
         auth_header = 'SAML_ID'
         roles_header = 'SAML_roles'
@@ -167,8 +155,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
         # The auth header needs to be for the current user.
         request.addHeader(auth_header, 'maurits')
-        self.assertEqual(
-            plugin.getRolesForPrincipal(user, request), ['student'])
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['student'])
         # Try an empty roles header.
         request.addHeader(roles_header, '')
         self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
@@ -177,36 +164,36 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
         # White space is stripped, case is kept by default.
         request.addHeader(roles_header, '  STUDENT    ')
-        self.assertEqual(
-            plugin.getRolesForPrincipal(user, request), ['STUDENT'])
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['STUDENT'])
         # Multiple roles can be set.
         request.addHeader(roles_header, '  one two three   ')
         self.assertEqual(
-            plugin.getRolesForPrincipal(user, request),
-            ['one', 'three', 'two'])
+            plugin.getRolesForPrincipal(user, request), ['one', 'three', 'two']
+        )
         # We can restrict the roles that we take over.
         plugin.allowed_roles = ('one', 'three')
-        self.assertEqual(
-            plugin.getRolesForPrincipal(user, request),
-            ['one', 'three'])
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['one', 'three'])
         # Case is kept from these canonical roles.
         request.addHeader(roles_header, 'ONE Two Three')
-        self.assertEqual(
-            plugin.getRolesForPrincipal(user, request),
-            ['one', 'three'])
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['one', 'three'])
         plugin.allowed_roles = ('One', 'THRee')
-        self.assertEqual(
-            plugin.getRolesForPrincipal(user, request),
-            ['One', 'THRee'])
+        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['One', 'THRee'])
         # We may have default roles, when the automatic Authenticated role
         # is not enough.
         plugin.default_roles = ('Member',)
-        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['Member', 'One', 'THRee'])
+        self.assertEqual(
+            plugin.getRolesForPrincipal(user, request), ['Member', 'One', 'THRee']
+        )
         plugin.default_roles = ('Member', 'Raccoon')
-        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['Member', 'One', 'Raccoon', 'THRee'])
+        self.assertEqual(
+            plugin.getRolesForPrincipal(user, request),
+            ['Member', 'One', 'Raccoon', 'THRee'],
+        )
         # If we unset the roles_header, no roles are found, except the default roles.
         plugin.roles_header = ''
-        self.assertEqual(plugin.getRolesForPrincipal(user, request), ['Member', 'Raccoon'])
+        self.assertEqual(
+            plugin.getRolesForPrincipal(user, request), ['Member', 'Raccoon']
+        )
         plugin.default_roles = ()
         self.assertEqual(plugin.getRolesForPrincipal(user, request), [])
 
@@ -216,17 +203,18 @@ class HeaderPluginUnitTests(unittest.TestCase):
             plugin._parse_memberdata_to_header(),
             [
                 ('uid', ['EA_PROFILE_uid'], None),
-                ('fullname',
-                 [
-                     'EA_PROFILE_firstname',
-                     'EA_PROFILE_middlename',
-                     'EA_PROFILE_lastname',
-                 ],
-                 None
-                 ),
+                (
+                    'fullname',
+                    [
+                        'EA_PROFILE_firstname',
+                        'EA_PROFILE_middlename',
+                        'EA_PROFILE_lastname',
+                    ],
+                    None,
+                ),
                 ('schoolbrin', ['EA_PROFILE_schoolbrin'], None),
                 ('rol', ['EA_PROFILE_role'], 'lower'),
-            ]
+            ],
         )
 
         # Test some corner cases.
@@ -234,44 +222,37 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(plugin._parse_memberdata_to_header(), [])
         plugin.memberdata_to_header = ('',)
         self.assertEqual(plugin._parse_memberdata_to_header(), [])
-        plugin.memberdata_to_header = (
-            '  hi     |     there     ',
-        )
+        plugin.memberdata_to_header = ('  hi     |     there     ',)
         self.assertEqual(
-            plugin._parse_memberdata_to_header(),
-            [('hi', ['there'], None)]
+            plugin._parse_memberdata_to_header(), [('hi', ['there'], None)]
         )
         plugin.memberdata_to_header = (
             '# ignore|me',
             'hi|there',
         )
         self.assertEqual(
-            plugin._parse_memberdata_to_header(),
-            [('hi', ['there'], None)]
+            plugin._parse_memberdata_to_header(), [('hi', ['there'], None)]
         )
         plugin.memberdata_to_header = (
             'too|many|pipes|for|me',
             'hi|there',
         )
         self.assertEqual(
-            plugin._parse_memberdata_to_header(),
-            [('hi', ['there'], None)]
+            plugin._parse_memberdata_to_header(), [('hi', ['there'], None)]
         )
         plugin.memberdata_to_header = (
             '   |missing_memberdata',
             'hi|there',
         )
         self.assertEqual(
-            plugin._parse_memberdata_to_header(),
-            [('hi', ['there'], None)]
+            plugin._parse_memberdata_to_header(), [('hi', ['there'], None)]
         )
         plugin.memberdata_to_header = (
             'missing_headers|   ',
             'hi|there',
         )
         self.assertEqual(
-            plugin._parse_memberdata_to_header(),
-            [('hi', ['there'], None)]
+            plugin._parse_memberdata_to_header(), [('hi', ['there'], None)]
         )
 
     def test_get_all_header_properties(self):
@@ -283,43 +264,51 @@ class HeaderPluginUnitTests(unittest.TestCase):
         plugin._get_all_header_properties(request)
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': '',
-             'rol': '',
-             'schoolbrin': '',
-             'uid': '',
-             })
+            {
+                'fullname': '',
+                'rol': '',
+                'schoolbrin': '',
+                'uid': '',
+            },
+        )
         request.addHeader('EA_PROFILE_foo', 'bar')
         request.addHeader('EA_PROFILE_firstname', 'Maurits')
         request.addHeader('EA_PROFILE_middlename', 'van')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': 'Maurits van',
-             'rol': '',
-             'schoolbrin': '',
-             'uid': '',
-             })
+            {
+                'fullname': 'Maurits van',
+                'rol': '',
+                'schoolbrin': '',
+                'uid': '',
+            },
+        )
         request.addHeader('EA_PROFILE_lastname', 'Rees')
         request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
         request.addHeader(auth_header, 'my uid')
         request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': 'Maurits van Rees',
-             'rol': 'docent',
-             'schoolbrin': 'AA44ZT',
-             'uid': 'my uid',
-             })
+            {
+                'fullname': 'Maurits van Rees',
+                'rol': 'docent',
+                'schoolbrin': 'AA44ZT',
+                'uid': 'my uid',
+            },
+        )
         request.addHeader('EA_PROFILE_lastname', 'Rees')
         request.addHeader('EA_PROFILE_schoolbrin', 'AA44ZT')
         request.addHeader(auth_header, 'my uid')
         request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin._get_all_header_properties(request),
-            {'fullname': 'Maurits van Rees',
-             'rol': 'docent',
-             'schoolbrin': 'AA44ZT',
-             'uid': 'my uid',
-             })
+            {
+                'fullname': 'Maurits van Rees',
+                'rol': 'docent',
+                'schoolbrin': 'AA44ZT',
+                'uid': 'my uid',
+            },
+        )
 
         # Whitespace within a header is kept.
         # If you want a list in your data, you can use the 'split' parser.
@@ -333,13 +322,14 @@ class HeaderPluginUnitTests(unittest.TestCase):
             {
                 'a': 'one two',
                 'b': ['one', 'two'],
-            }
+            },
         )
 
     def test_no_challenge(self):
         # By default we do not challenge, because we do not know how.
         # Prepare the plugin.
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = HeaderPlugin()
 
         # Prepare the request.
@@ -358,6 +348,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
     def test_challenge_deny(self):
         # Prepare the plugin.
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = HeaderPlugin()
         plugin.deny_unauthorized = True
 
@@ -372,13 +363,12 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # Check the response.
         out.seek(0)
         # Yes, this must be bytes, not 'str' on Python 3.
-        self.assertIn(
-            b'ERROR: denying any unauthorized access.',
-            out.read())
+        self.assertIn(b'ERROR: denying any unauthorized access.', out.read())
 
     def test_challenge_redirect(self):
         # Prepare the plugin.
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = HeaderPlugin()
         url = 'https://example.org/saml-login'
         plugin.redirect_url = url
@@ -394,19 +384,20 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # Check the response.
         out.seek(0)
         self.assertEqual(out.read(), b'')
-        self.assertEqual(response.headers['location'], '{}?came_from={}'.format(url, request.URL))
+        self.assertEqual(
+            response.headers['location'], '{}?came_from={}'.format(url, request.URL)
+        )
 
     def test_extractCredentials(self):
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = HeaderPlugin()
         auth_header = 'SAML_id'
         plugin.userid_header = auth_header
         request = HeaderRequest()
-        self.assertEqual(plugin.extractCredentials(request),
-                         {'user_id': None})
+        self.assertEqual(plugin.extractCredentials(request), {'user_id': None})
         request.addHeader(auth_header, 'my uid')
-        self.assertEqual(plugin.extractCredentials(request),
-                         {'user_id': 'my uid'})
+        self.assertEqual(plugin.extractCredentials(request), {'user_id': 'my uid'})
 
         # Now test with required_headers
         plugin.required_headers = ('HEADER1', 'HEADER2')
@@ -414,26 +405,25 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader('HEADER1', '')
         self.assertEqual(plugin.extractCredentials(request), {})
         request.addHeader('HEADER2', '')
-        self.assertEqual(plugin.extractCredentials(request),
-                         {'user_id': 'my uid'})
+        self.assertEqual(plugin.extractCredentials(request), {'user_id': 'my uid'})
 
     def test_authenticateCredentials(self):
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = HeaderPlugin()
         plugin.id = 'my_plugin'
         self.assertIsNone(plugin.authenticateCredentials({}))
-        self.assertIsNone(plugin.authenticateCredentials({
-            'user_id': '123'
-        }))
-        self.assertIsNone(plugin.authenticateCredentials({
-            'extractor': 'my_plugin'
-        }))
-        self.assertIsNone(plugin.authenticateCredentials({
-            'user_id': '', 'extractor': 'my_plugin'
-        }))
-        self.assertEqual(plugin.authenticateCredentials({
-            'user_id': '123', 'extractor': 'my_plugin'
-        }), ('123', '123'))
+        self.assertIsNone(plugin.authenticateCredentials({'user_id': '123'}))
+        self.assertIsNone(plugin.authenticateCredentials({'extractor': 'my_plugin'}))
+        self.assertIsNone(
+            plugin.authenticateCredentials({'user_id': '', 'extractor': 'my_plugin'})
+        )
+        self.assertEqual(
+            plugin.authenticateCredentials(
+                {'user_id': '123', 'extractor': 'my_plugin'}
+            ),
+            ('123', '123'),
+        )
 
     def test_getPropertiesForUser(self):
         # from pas.plugins.headers.plugins import HeaderPlugin
@@ -451,10 +441,8 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(auth_header, 'maurits')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': '',
-             'rol': '',
-             'schoolbrin': '',
-             'uid': 'maurits'})
+            {'fullname': '', 'rol': '', 'schoolbrin': '', 'uid': 'maurits'},
+        )
         request.addHeader('EA_PROFILE_firstname', 'Maurits')
         request.addHeader('EA_PROFILE_middlename', 'van')
         request.addHeader('EA_PROFILE_lastname', 'Rees')
@@ -462,17 +450,23 @@ class HeaderPluginUnitTests(unittest.TestCase):
         request.addHeader(roles_header, 'docent')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': 'Maurits van Rees',
-             'rol': 'docent',
-             'schoolbrin': 'AA44ZT',
-             'uid': 'maurits'})
+            {
+                'fullname': 'Maurits van Rees',
+                'rol': 'docent',
+                'schoolbrin': 'AA44ZT',
+                'uid': 'maurits',
+            },
+        )
         request.addHeader(roles_header, '  LEERling  \t ')
         self.assertEqual(
             plugin.getPropertiesForUser(user, request),
-            {'fullname': 'Maurits van Rees',
-             'rol': 'leerling',
-             'schoolbrin': 'AA44ZT',
-             'uid': 'maurits'})
+            {
+                'fullname': 'Maurits van Rees',
+                'rol': 'leerling',
+                'schoolbrin': 'AA44ZT',
+                'uid': 'maurits',
+            },
+        )
         arthur = DummyUser('arthur')
         self.assertIsNone(plugin.getPropertiesForUser(arthur, request))
 
@@ -483,10 +477,12 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # Anyway, we *do* need to register such a function.
         # So let's at least call it and see that nothing breaks.
         from pas.plugins.headers.plugins import add_header_plugin
+
         add_header_plugin()
 
     def test_resetCredentials(self):
         from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = HeaderPlugin()
 
         # On logout, the plugin may want to remove some cookies.

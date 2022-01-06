@@ -240,7 +240,9 @@ class TestFull(unittest.TestCase):
     def test_redirect_url_double_slash(self):
         # The test setUp uses /headerlogin.  Now test with double slash.
         # Easiest is to take //nohost/plone/headerlogin without http or https.
-        self.plugin.redirect_url = '//' + self.portal_url.split('//')[1] + '/headerlogin'
+        self.plugin.redirect_url = (
+            '//' + self.portal_url.split('//')[1] + '/headerlogin'
+        )
         transaction.commit()
         self.browser.handleErrors = True
         self.browser.open(self.portal_url + '/@@overview-controlpanel')
@@ -262,7 +264,8 @@ class TestFull(unittest.TestCase):
             self.browser.open(
                 '{}/headerlogin?came_from={}/require_login'.format(
                     self.portal_url, self.portal_url
-                ))
+                )
+            )
 
     def test_redirect_referer_login(self):
         # If our referer is a login-related form and we are still anonymous,
