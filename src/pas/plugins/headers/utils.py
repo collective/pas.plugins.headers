@@ -4,11 +4,11 @@ from Products.CMFCore.utils import getToolByName
 import six
 
 
-PLUGIN_ID = 'request_headers'
+PLUGIN_ID = "request_headers"
 
 
 def get_plugin(context):
-    pas = getToolByName(context, 'acl_users', None)
+    pas = getToolByName(context, "acl_users", None)
     if pas is None:
         # This is too hard to really test, and is really a corner case.
         return  # pragma: no cover

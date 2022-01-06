@@ -7,7 +7,7 @@ from Products.PluggableAuthService.PluggableAuthService import (
 from zope.i18nmessageid import MessageFactory
 
 
-_ = MessageFactory('pas.plugins.headers')
+_ = MessageFactory("pas.plugins.headers")
 
 
 def initialize(context):  # pragma: no cover

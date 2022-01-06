@@ -6,7 +6,7 @@ import six
 
 logger = logging.getLogger(__name__)
 # yes, ja, true
-_true_chars = 'y j t 1'.split()
+_true_chars = "y j t 1".split()
 
 
 def _boolean(value):
@@ -32,14 +32,14 @@ def _int(value):
 
 def _lower(value):
     if not isinstance(value, (six.binary_type, six.text_type)):
-        return ''
+        return ""
     value = value.strip()
     return value.lower()
 
 
 def _upper(value):
     if not isinstance(value, (six.binary_type, six.text_type)):
-        return ''
+        return ""
     value = value.strip()
     return value.upper()
 
@@ -75,8 +75,8 @@ def parse(parser_name, value):
 
 
 # Register our own basic parsers.
-register_parser('bool', _boolean)
-register_parser('int', _int)
-register_parser('lower', _lower)
-register_parser('upper', _upper)
-register_parser('split', _split)
+register_parser("bool", _boolean)
+register_parser("int", _int)
+register_parser("lower", _lower)
+register_parser("upper", _upper)
+register_parser("split", _split)

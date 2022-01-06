@@ -5,18 +5,18 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-long_description = '\n\n'.join(
+long_description = "\n\n".join(
     [
-        open('README.rst').read(),
-        open('CONTRIBUTORS.rst').read(),
-        open('CHANGES.rst').read(),
+        open("README.rst").read(),
+        open("CONTRIBUTORS.rst").read(),
+        open("CHANGES.rst").read(),
     ]
 )
 
 
 setup(
-    name='pas.plugins.headers',
-    version='1.5.0.dev0',
+    name="pas.plugins.headers",
+    version="1.5.0.dev0",
     description="PAS plugin for authentication based on request headers",
     long_description=long_description,
     # Get more from https://pypi.org/classifiers/
@@ -37,29 +37,29 @@ setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
-    keywords='Python Plone Zope PAS acl_users SAML',
-    author='Maurits van Rees',
-    author_email='m.van.rees@zestsoftware.nl',
-    url='https://github.com/collective/pas.plugins.headers',
-    license='GPL version 2',
-    packages=find_packages('src', exclude=['ez_setup']),
-    namespace_packages=['pas', 'pas.plugins'],
-    package_dir={'': 'src'},
+    keywords="Python Plone Zope PAS acl_users SAML",
+    author="Maurits van Rees",
+    author_email="m.van.rees@zestsoftware.nl",
+    url="https://github.com/collective/pas.plugins.headers",
+    license="GPL version 2",
+    packages=find_packages("src", exclude=["ez_setup"]),
+    namespace_packages=["pas", "pas.plugins"],
+    package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
     install_requires=[
         # -*- Extra requirements: -*-
         # 'plone.api>=1.8.4',
-        'Products.GenericSetup>=1.8.2',
-        'Products.PluggableAuthService',
-        'setuptools',
-        'six>=1.12.0',
+        "Products.GenericSetup>=1.8.2",
+        "Products.PluggableAuthService",
+        "setuptools",
+        "six>=1.12.0",
     ],
     extras_require={
-        'test': [
-            'plone.api',
-            'plone.app.testing',
-            'plone.testing',
+        "test": [
+            "plone.api",
+            "plone.app.testing",
+            "plone.testing",
         ],
     },
     entry_points="""
