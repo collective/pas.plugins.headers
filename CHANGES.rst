@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-1.5.0 (unreleased)
+1.5.0 (2022-01-06)
 ------------------
 
 - Add support for being a Credentials Reset plugin.
