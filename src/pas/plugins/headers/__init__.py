@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """Init and utils."""
 from AccessControl.Permissions import manage_users as ManageUsers
-from Products.PluggableAuthService.PluggableAuthService import (
-    registerMultiPlugin,
-)  # noqa
+from Products.PluggableAuthService.PluggableAuthService import registerMultiPlugin
 from zope.i18nmessageid import MessageFactory
 
 

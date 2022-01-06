@@ -29,9 +29,9 @@ class TestGetPlugin(unittest.TestCase):
         self.assertIsNone(get_plugin(self.portal))
 
     def test_get_plugin_with_bad_plugin(self):
-        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
-        from pas.plugins.headers.utils import PLUGIN_ID
         from pas.plugins.headers.utils import get_plugin
+        from pas.plugins.headers.utils import PLUGIN_ID
+        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 
         pas = api.portal.get_tool("acl_users")
         pas._delObject(PLUGIN_ID)
@@ -39,9 +39,9 @@ class TestGetPlugin(unittest.TestCase):
         self.assertIsNone(get_plugin(self.portal))
 
     def test_get_plugin_proper(self):
+        from pas.plugins.headers.plugins import HeaderPlugin
         from pas.plugins.headers.utils import get_plugin
         from pas.plugins.headers.utils import PLUGIN_ID
-        from pas.plugins.headers.plugins import HeaderPlugin
 
         plugin = get_plugin(self.portal)
         self.assertIsNotNone(plugin)

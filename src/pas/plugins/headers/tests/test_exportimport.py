@@ -62,8 +62,8 @@ class ExportImportBaseTestCase(unittest.TestCase):
 
     def _removePlugin(self):
         """Remove the plugin."""
-        from plone import api
         from pas.plugins.headers.utils import PLUGIN_ID
+        from plone import api
 
         pas = api.portal.get_tool("acl_users")
         pas._delObject(PLUGIN_ID)

@@ -4,9 +4,7 @@ from .utils import safe_make_string
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
 from plone import api
-from Products.PluggableAuthService.interfaces.plugins import (
-    IAuthenticationPlugin,
-)  # noqa
+from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
 from Products.PluggableAuthService.interfaces.plugins import ICredentialsResetPlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin

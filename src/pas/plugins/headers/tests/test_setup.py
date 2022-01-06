@@ -47,8 +47,8 @@ class TestSetup(unittest.TestCase):
 
     def test_double_install(self):
         # A double install should not cause trouble.
-        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
         from pas.plugins.headers.utils import PLUGIN_ID
+        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 
         pas = api.portal.get_tool("acl_users")
         pas._delObject(PLUGIN_ID)
@@ -60,8 +60,8 @@ class TestSetup(unittest.TestCase):
 
     def test_uninstall_with_bad_plugin(self):
         # When a different plugin with 'our' id is found, we do not remove it.
-        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
         from pas.plugins.headers.utils import PLUGIN_ID
+        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 
         pas = api.portal.get_tool("acl_users")
         pas._delObject(PLUGIN_ID)

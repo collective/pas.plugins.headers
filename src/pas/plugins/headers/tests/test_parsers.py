@@ -152,9 +152,9 @@ class ParsersUnitTests(unittest.TestCase):
 
     def test_register_parser_and_get_parser(self):
         # They only make sense to test in combination.
-        from pas.plugins.headers.parsers import register_parser
         from pas.plugins.headers.parsers import get_parser
         from pas.plugins.headers.parsers import parse
+        from pas.plugins.headers.parsers import register_parser
 
         def duplicator(value):
             return value + value
