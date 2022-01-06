@@ -6,6 +6,7 @@ from AccessControl.class_init import InitializeClass
 from plone import api
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin  # noqa
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
+from Products.PluggableAuthService.interfaces.plugins import ICredentialsResetPlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
 from Products.PluggableAuthService.interfaces.plugins import IPropertiesPlugin
 from Products.PluggableAuthService.interfaces.plugins import IRolesPlugin
@@ -84,6 +85,7 @@ class HeaderPlugin(BasePlugin):
     memberdata_to_header = ()
     create_ticket = False
     default_roles = ()
+    cookies_removed_on_logout = ()
     _properties = (
         dict(id='userid_header', type='string', mode='w',
              label='Header to use as user id'),
@@ -110,6 +112,9 @@ class HeaderPlugin(BasePlugin):
                    'Then headers need not be checked on all urls.'),
         dict(id='default_roles', type='lines', mode='w',
              label='Default roles',
+             ),
+        dict(id='cookies_removed_on_logout', type='lines', mode='w',
+             label='Cookies to remove on logout',
              ),
     )
 
@@ -299,6 +304,36 @@ class HeaderPlugin(BasePlugin):
             result.append(canonical_role)
         return sorted(result)
 
+    def resetCredentials(self, request=None, response=None):
+        """Called for all ICredentialsResetPlugins when user has logged out.
+
+        The authentication server responsible for setting headers
+        may also have set a cookie, for example mod_auth_openidc_session.
+        One way to logout is to simply remove this cookie.
+
+        You can also add a wildcard at the end.  To get rid of
+        mod_auth_openidc_state_<random stuff>, you can use:
+        mod_auth_openidc_state_*
+
+        Note:
+        We could think of adding a logout_url property and redirect to it here.
+        But response.redirect is overridden in later code.  Twice even.
+        And a 'raise Redirect' exception is swallowed.
+        So this would be tricky.
+        Perhaps override the logged_out page.
+        """
+        cookies = request.cookies.keys()
+        for to_remove in self.cookies_removed_on_logout:
+            if not to_remove.endswith('*'):
+                # the simple case
+                response.expireCookie(to_remove, path='/')
+                continue
+            # Remove the wildcard at the end.
+            to_remove = to_remove[:-1]
+            for existing in cookies:
+                if existing.startswith(to_remove):
+                    response.expireCookie(existing, path='/')
+
     def _get_userid(self, request):
         """Get userid property from the request headers."""
         if request is None:
@@ -370,6 +405,7 @@ classImplements(
     IExtractionPlugin,
     IAuthenticationPlugin,
     IChallengePlugin,
+    ICredentialsResetPlugin,
     IPropertiesPlugin,
     IRolesPlugin,
 )

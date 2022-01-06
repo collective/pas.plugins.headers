@@ -484,3 +484,40 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # So let's at least call it and see that nothing breaks.
         from pas.plugins.headers.plugins import add_header_plugin
         add_header_plugin()
+
+    def test_resetCredentials(self):
+        from pas.plugins.headers.plugins import HeaderPlugin
+        plugin = HeaderPlugin()
+
+        # On logout, the plugin may want to remove some cookies.
+        # Calling it on a non-authenticated request without cookies
+        # should not give an error.
+        request = HeaderRequest()
+        plugin.resetCredentials(request, request.response)
+
+        # Configure the plugin and add some cookies to the request.
+        plugin.cookies_removed_on_logout = ("away",)
+        request = HeaderRequest(environ={'HTTP_COOKIE': 'keep=1, away=1'})
+        self.assertEqual(sorted(request.cookies.keys()), ['away', 'keep'])
+        plugin.resetCredentials(request, request.response)
+        # The 'away' cookies is removed by the response:
+        self.assertTrue(request.response.getCookie('away')['expires'])
+        self.assertEqual(request.response.getCookie('away')['max_age'], 0)
+        self.assertEqual(request.response.getCookie('away')['value'], 'deleted')
+        # The response does nothing with the 'keep' cookie:
+        self.assertFalse(request.response.getCookie('keep'))
+
+        # You can use a wildcard at the end.
+        plugin.cookies_removed_on_logout = ("a*",)
+        request = HeaderRequest(environ={'HTTP_COOKIE': 'a=1, always=1, ba=1'})
+        self.assertEqual(sorted(request.cookies.keys()), ['a', 'always', 'ba'])
+        plugin.resetCredentials(request, request.response)
+        # All cookies starting with 'a' are removed by the response:
+        self.assertTrue(request.response.getCookie('a')['expires'])
+        self.assertEqual(request.response.getCookie('a')['max_age'], 0)
+        self.assertEqual(request.response.getCookie('a')['value'], 'deleted')
+        self.assertTrue(request.response.getCookie('always')['expires'])
+        self.assertEqual(request.response.getCookie('always')['max_age'], 0)
+        self.assertEqual(request.response.getCookie('always')['value'], 'deleted')
+        # The response does nothing with the other cookie:
+        self.assertFalse(request.response.getCookie('ba'))
