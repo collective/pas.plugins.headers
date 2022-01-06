@@ -2,10 +2,12 @@ Changelog
 =========
 
 
-1.4.1 (unreleased)
+1.5.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add support for being a Credentials Reset plugin.
+  This part is called when a user logs out.
+  [maurits]
 
 
 1.4.0 (2021-12-14)

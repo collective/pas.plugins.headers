@@ -43,6 +43,14 @@
       handler="pas.plugins.headers.exportimport.export_properties"
       />
 
+  <genericsetup:upgradeStep
+      source="1000"
+      destination="1001"
+      profile="pas.plugins.headers:default"
+      title="Activate ICredentialsResetPlugin"
+      handler="pas.plugins.headers.setuphandlers.activate_credentials_reset_plugin"
+      />
+
   <utility
       factory=".setuphandlers.HiddenProfiles"
       name="pas.plugins.headers-hiddenprofiles"

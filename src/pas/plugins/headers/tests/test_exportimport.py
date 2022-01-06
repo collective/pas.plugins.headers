@@ -293,6 +293,7 @@ class TestExport(ExportImportBaseTestCase):
                        context.get_exported_data().splitlines()]),
             """{
 "allowed_roles": [],
+"cookies_removed_on_logout": [],
 "create_ticket": false,
 "default_roles": [],
 "deny_unauthorized": false,
@@ -307,6 +308,7 @@ class TestExport(ExportImportBaseTestCase):
             json.loads(context.get_exported_data()),
             {
                 'allowed_roles': [],
+                'cookies_removed_on_logout': [],
                 'default_roles': [],
                 'deny_unauthorized': False,
                 'create_ticket': False,
@@ -330,6 +332,7 @@ class TestExport(ExportImportBaseTestCase):
             json.loads(context.get_exported_data()),
             {
                 'allowed_roles': ['root'],
+                'cookies_removed_on_logout': [],
                 'default_roles': [],
                 'deny_unauthorized': True,
                 'create_ticket': True,

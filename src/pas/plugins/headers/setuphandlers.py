@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from pas.plugins.headers.plugins import HeaderPlugin
+from pas.plugins.headers.utils import PLUGIN_ID
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.interfaces import INonInstallable
 from zope.interface import implementer
@@ -25,8 +27,6 @@ def post_install(context):
     pas = getToolByName(context, 'acl_users')
 
     # Create plugin if it does not exist.
-    from pas.plugins.headers.plugins import HeaderPlugin
-    from pas.plugins.headers.utils import PLUGIN_ID
     if PLUGIN_ID not in pas.objectIds():
         plugin = HeaderPlugin(
             title='Request Headers',
@@ -81,3 +81,34 @@ def uninstall(context):
         return
     pas._delObject(PLUGIN_ID)
     logger.info('Removed HeaderPlugin %s from acl_users.', PLUGIN_ID)
+
+
+def activate_plugin_type(context, plugin_type):
+    """Activate the plugin_type for our plugin.
+
+    plugin_type is an interface.
+    """
+    pas = getToolByName(context, "acl_users")
+    if PLUGIN_ID not in pas.objectIds():
+        logger.warning("%s is not in acl_users", PLUGIN_ID)
+        return
+    plugin = getattr(pas, PLUGIN_ID)
+    if not isinstance(plugin, HeaderPlugin):
+        logger.warning("Existing PAS plugin %s is not a HeaderPlugin.", PLUGIN_ID)
+        return
+
+    # Activate the plugin type.
+    plugins = pas.plugins
+    plugin_type_name = plugin_type.__name__
+    ids = plugins.listPluginIds(plugin_type)
+    if PLUGIN_ID not in ids:
+        plugins.activatePlugin(plugin_type, PLUGIN_ID)
+        logger.info("%s plugin activated.", plugin_type_name)
+    else:
+        logger.info("%s plugin was already activated.", plugin_type_name)
+
+
+def activate_credentials_reset_plugin(context):
+    from Products.PluggableAuthService.interfaces.plugins import ICredentialsResetPlugin
+
+    activate_plugin_type(context, ICredentialsResetPlugin)
