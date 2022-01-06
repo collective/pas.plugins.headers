@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """Init and utils."""
 from AccessControl.Permissions import manage_users as ManageUsers
-from Products.PluggableAuthService.PluggableAuthService import registerMultiPlugin  # noqa
+from Products.PluggableAuthService.PluggableAuthService import registerMultiPlugin
 from zope.i18nmessageid import MessageFactory
 
 
-_ = MessageFactory('pas.plugins.headers')
+_ = MessageFactory("pas.plugins.headers")
 
 
 def initialize(context):  # pragma: no cover
@@ -17,7 +17,6 @@ def initialize(context):  # pragma: no cover
     context.registerClass(
         plugins.HeaderPlugin,
         permission=ManageUsers,
-        constructors=(
-            plugins.add_header_plugin, ),
+        constructors=(plugins.add_header_plugin,),
         # icon='www/PluggableAuthService.png',
     )

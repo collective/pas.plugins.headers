@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING  # noqa
+from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
 from plone import api
 
 import unittest
@@ -12,33 +12,37 @@ class TestGetPlugin(unittest.TestCase):
 
     def setUp(self):
         """Custom shared utility setup for tests."""
-        self.portal = self.layer['portal']
+        self.portal = self.layer["portal"]
 
     def test_get_plugin_no_pas(self):
         from pas.plugins.headers.utils import get_plugin
-        self.portal._delObject('acl_users')
+
+        self.portal._delObject("acl_users")
         self.assertIsNone(get_plugin(self.portal))
 
     def test_get_plugin_removed(self):
         from pas.plugins.headers.utils import get_plugin
         from pas.plugins.headers.utils import PLUGIN_ID
-        pas = api.portal.get_tool('acl_users')
+
+        pas = api.portal.get_tool("acl_users")
         pas._delObject(PLUGIN_ID)
         self.assertIsNone(get_plugin(self.portal))
 
     def test_get_plugin_with_bad_plugin(self):
-        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
-        from pas.plugins.headers.utils import PLUGIN_ID
         from pas.plugins.headers.utils import get_plugin
-        pas = api.portal.get_tool('acl_users')
+        from pas.plugins.headers.utils import PLUGIN_ID
+        from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
+
+        pas = api.portal.get_tool("acl_users")
         pas._delObject(PLUGIN_ID)
         pas._setObject(PLUGIN_ID, BasePlugin())
         self.assertIsNone(get_plugin(self.portal))
 
     def test_get_plugin_proper(self):
+        from pas.plugins.headers.plugins import HeaderPlugin
         from pas.plugins.headers.utils import get_plugin
         from pas.plugins.headers.utils import PLUGIN_ID
-        from pas.plugins.headers.plugins import HeaderPlugin
+
         plugin = get_plugin(self.portal)
         self.assertIsNotNone(plugin)
         self.assertEqual(plugin.id, PLUGIN_ID)
@@ -52,22 +56,24 @@ class TestSafeMakeString(unittest.TestCase):
     def test_safe_make_string(self):
         from pas.plugins.headers.utils import safe_make_string
 
-        self.assertEqual(safe_make_string(b''), '')
-        self.assertEqual(safe_make_string(''), '')
-        self.assertEqual(safe_make_string(u''), '')
+        self.assertEqual(safe_make_string(b""), "")
+        self.assertEqual(safe_make_string(""), "")
+        self.assertEqual(safe_make_string(u""), "")
 
         # e-with-an-accent.
-        if isinstance('', bytes):
+        if isinstance("", bytes):
             # On Python 2 we expect an encoded string.
-            expected = '\xc3\xab'
+            expected = "\xc3\xab"
         else:
             # On Python 3 we expect a native string.
-            expected = '\xeb'
-        self.assertEqual(safe_make_string(b'\xc3\xab'), expected)
+            expected = "\xeb"
+        self.assertEqual(safe_make_string(b"\xc3\xab"), expected)
         self.assertEqual(safe_make_string(expected), expected)
-        self.assertEqual(safe_make_string(u'\xeb'), expected)
+        self.assertEqual(safe_make_string(u"\xeb"), expected)
 
-        self.assertEqual(safe_make_string([1, b'two', 'three', u'four']), [1, 'two', 'three', 'four'])
+        self.assertEqual(
+            safe_make_string([1, b"two", "three", u"four"]), [1, "two", "three", "four"]
+        )
 
         self.assertEqual(safe_make_string(0), 0)
         self.assertEqual(safe_make_string(None), None)

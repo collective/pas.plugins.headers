@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from .parsers import parse
-from .utils import safe_make_string
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
 from plone import api
-from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin  # noqa
+from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
 from Products.PluggableAuthService.interfaces.plugins import ICredentialsResetPlugin
 from Products.PluggableAuthService.interfaces.plugins import IExtractionPlugin
@@ -32,14 +31,14 @@ def decode_header(value):
     if not isinstance(value, six.binary_type):
         return value
     try:
-        return value.decode('utf-8')
+        return value.decode("utf-8")
     except UnicodeDecodeError:
         pass
     try:
-        return value.decode('latin-1')
+        return value.decode("latin-1")
     except UnicodeDecodeError:  # pragma: no cover
         # I don't know how to trigger this in tests.
-        return value.decode('utf-8', 'ignore')
+        return value.decode("utf-8", "ignore")
 
 
 def combine_values(values):
@@ -51,17 +50,17 @@ def combine_values(values):
     returns a string.  So text on Py 3, bytes on Py 2.
     """
     if not isinstance(values, (list, tuple)):
-        return ''
+        return ""
     # filter out empty values.
     values = filter(None, values)
     # Turn values into unicode so we can safely combine them.
     values = [decode_header(value).strip() for value in values]
     # again filter out empty values
     values = filter(None, values)
-    full = u' '.join(values)
+    full = u" ".join(values)
     # Encode the result to string on Python 2.
     if six.PY2:
-        return full.encode('utf-8')
+        return full.encode("utf-8")
     return full
 
 
@@ -72,54 +71,81 @@ class HeaderPlugin(BasePlugin):
     to set correct headers and remove any bad headers from hackers.
     """
 
-    meta_type = 'Header Plugin'
+    meta_type = "Header Plugin"
 
     security = ClassSecurityInfo()
 
-    userid_header = ''
-    roles_header = ''
+    userid_header = ""
+    roles_header = ""
     allowed_roles = ()
     required_headers = ()
     deny_unauthorized = False
-    redirect_url = ''
+    redirect_url = ""
     memberdata_to_header = ()
     create_ticket = False
     default_roles = ()
     cookies_removed_on_logout = ()
     _properties = (
-        dict(id='userid_header', type='string', mode='w',
-             label='Header to use as user id'),
-        dict(id='roles_header', type='string', mode='w',
-             label='Header to use as roles'),
-        dict(id='allowed_roles', type='lines', mode='w',
-             label='Allowed roles'),
-        dict(id='required_headers', type='lines', mode='w',
-             label='Required headers',
-             # Note: description is currently not shown anywhere in the ZMI.
-             description='Without these, the plugin does not authenticate.',
-             ),
-        dict(id='deny_unauthorized', type='boolean', mode='w',
-             label='Deny unauthorized access. '
-                   'Do not redirect to a login form.'),
-        dict(id='redirect_url', type='string', mode='w',
-             label='URL to redirect to when unauthorized'),
-        dict(id='memberdata_to_header', type='lines', mode='w',
-             label='Mapping from memberdata property to request header. '
-                   'Format: propname|header1 header2',
-             ),
-        dict(id='create_ticket', type='boolean', mode='w',
-             label='Create authentication ticket. '
-                   'Then headers need not be checked on all urls.'),
-        dict(id='default_roles', type='lines', mode='w',
-             label='Default roles',
-             ),
-        dict(id='cookies_removed_on_logout', type='lines', mode='w',
-             label='Cookies to remove on logout',
-             ),
+        dict(
+            id="userid_header",
+            type="string",
+            mode="w",
+            label="Header to use as user id",
+        ),
+        dict(
+            id="roles_header", type="string", mode="w", label="Header to use as roles"
+        ),
+        dict(id="allowed_roles", type="lines", mode="w", label="Allowed roles"),
+        dict(
+            id="required_headers",
+            type="lines",
+            mode="w",
+            label="Required headers",
+            # Note: description is currently not shown anywhere in the ZMI.
+            description="Without these, the plugin does not authenticate.",
+        ),
+        dict(
+            id="deny_unauthorized",
+            type="boolean",
+            mode="w",
+            label="Deny unauthorized access. " "Do not redirect to a login form.",
+        ),
+        dict(
+            id="redirect_url",
+            type="string",
+            mode="w",
+            label="URL to redirect to when unauthorized",
+        ),
+        dict(
+            id="memberdata_to_header",
+            type="lines",
+            mode="w",
+            label="Mapping from memberdata property to request header. "
+            "Format: propname|header1 header2",
+        ),
+        dict(
+            id="create_ticket",
+            type="boolean",
+            mode="w",
+            label="Create authentication ticket. "
+            "Then headers need not be checked on all urls.",
+        ),
+        dict(
+            id="default_roles",
+            type="lines",
+            mode="w",
+            label="Default roles",
+        ),
+        dict(
+            id="cookies_removed_on_logout",
+            type="lines",
+            mode="w",
+            label="Cookies to remove on logout",
+        ),
     )
 
     def challenge(self, request, response):
-        """ Assert via the response that credentials will be gathered.
+        """Assert via the response that credentials will be gathered.
 
         For IChallengePlugin.
 
@@ -134,27 +160,26 @@ class HeaderPlugin(BasePlugin):
         if self.deny_unauthorized:
             # We do not give the user a chance to login.
             # Yes, this must be bytes, not 'str' on Python 3.
-            response.write(
-                b'ERROR: denying any unauthorized access.\n')
+            response.write(b"ERROR: denying any unauthorized access.\n")
             return True
         if self.redirect_url:
             url = self.redirect_url
             # url is expected to be a native string both on Py 2 and 3,
             # but I have seen it as bytes on Py 3 in a traceback.
             if six.PY3 and isinstance(url, bytes):
-                url = url.decode('utf-8')
+                url = url.decode("utf-8")
             # If url is headerlogin, we want localhost:8080/Plone/headerlogin
             # and not localhost:8080/Plone/current-folder/headerlogin.
             # So relative from the site root.
             # Or from the navigation root, but that needs a context, which we don't have here.
             # Watch out for '//some.domain' as external redirect url.
-            if '//' not  in url:
-                if not url.startswith('/'):
+            if "//" not in url:
+                if not url.startswith("/"):
                     # Avoid getting .../Ploneheaderlogin as url.
-                    url = '/' + url
+                    url = "/" + url
                 url = api.portal.get().absolute_url() + url
-            url = '{}?came_from={}'.format(url, request.URL)
-            logger.warning('Redirecting to %s', url)
+            url = "{}?came_from={}".format(url, request.URL)
+            logger.warning("Redirecting to %s", url)
             response.redirect(url, lock=1)
             return True
         # We have no redirect_url, so we do not know how to challenge.
@@ -163,7 +188,7 @@ class HeaderPlugin(BasePlugin):
         return
 
     def extractCredentials(self, request):
-        """ request -> {...}
+        """request -> {...}
 
         For IExtractionPlugin.
 
@@ -180,11 +205,11 @@ class HeaderPlugin(BasePlugin):
                 header = header.decode("utf-8")
             if request.getHeader(header, _MARKER) is _MARKER:
                 return creds
-        creds['user_id'] = self._get_userid(request)
+        creds["user_id"] = self._get_userid(request)
         return creds
 
     def authenticateCredentials(self, credentials):
-        """ credentials -> (userid, login)
+        """credentials -> (userid, login)
 
         For IAuthenticationPlugin.
 
@@ -196,9 +221,9 @@ class HeaderPlugin(BasePlugin):
         o If the credentials cannot be authenticated, return None.
         """
         # Check if the credentials are from our own plugin.
-        if credentials.get('extractor') != self.getId():
+        if credentials.get("extractor") != self.getId():
             return
-        user_id = credentials.get('user_id')
+        user_id = credentials.get("user_id")
         if not user_id:
             return
         if self.create_ticket:
@@ -213,19 +238,19 @@ class HeaderPlugin(BasePlugin):
         pas = self._getPAS()
         if pas is None:
             return
-        if 'session' not in pas:
+        if "session" not in pas:
             return
         info = pas._verifyUser(pas.plugins, user_id=user_id)
         if info is None:
-            logger.debug('No user found matching header. Will not set up session.')
+            logger.debug("No user found matching header. Will not set up session.")
             return
         request = self.REQUEST
-        response = request['RESPONSE']
+        response = request["RESPONSE"]
         pas.session._setupSession(user_id, response)
-        logger.debug('Done setting up session/ticket for %s' % user_id)
+        logger.debug("Done setting up session/ticket for %s" % user_id)
 
     def getPropertiesForUser(self, user, request=None):
-        """ user -> {...}
+        """user -> {...}
 
         For IPropertiesPlugin.
 
@@ -255,7 +280,7 @@ class HeaderPlugin(BasePlugin):
         return self._get_all_header_properties(request)
 
     def getRolesForPrincipal(self, principal, request=None):
-        """ principal -> ( role_1, ... role_N )
+        """principal -> ( role_1, ... role_N )
 
         For IRolesPlugin.
 
@@ -299,7 +324,7 @@ class HeaderPlugin(BasePlugin):
             canonical_role = allowed_roles.get(role.lower())
             if not canonical_role:
                 # SAML may give five roles, out of which Plone uses only two.
-                logger.debug('Ignoring disallowed role in header: %s', role)
+                logger.debug("Ignoring disallowed role in header: %s", role)
                 continue
             result.append(canonical_role)
         return sorted(result)
@@ -324,15 +349,15 @@ class HeaderPlugin(BasePlugin):
         """
         cookies = request.cookies.keys()
         for to_remove in self.cookies_removed_on_logout:
-            if not to_remove.endswith('*'):
+            if not to_remove.endswith("*"):
                 # the simple case
-                response.expireCookie(to_remove, path='/')
+                response.expireCookie(to_remove, path="/")
                 continue
             # Remove the wildcard at the end.
             to_remove = to_remove[:-1]
             for existing in cookies:
                 if existing.startswith(to_remove):
-                    response.expireCookie(existing, path='/')
+                    response.expireCookie(existing, path="/")
 
     def _get_userid(self, request):
         """Get userid property from the request headers."""
@@ -356,14 +381,14 @@ class HeaderPlugin(BasePlugin):
                 continue
             if isinstance(line, bytes):
                 line = line.decode("utf-8")
-            if line.startswith('#'):
+            if line.startswith("#"):
                 continue
-            pipes = line.count('|')
+            pipes = line.count("|")
             if pipes == 1:
-                member_prop, headers = line.split('|')
+                member_prop, headers = line.split("|")
                 parser = None
             elif pipes == 2:
-                member_prop, headers, parser = line.split('|')
+                member_prop, headers, parser = line.split("|")
             else:  # pragma: no cover
                 # We are testing for this, but coverage does not see it.
                 continue
@@ -386,8 +411,8 @@ class HeaderPlugin(BasePlugin):
             return result
         for member_prop, headers, parser in self._parse_memberdata_to_header():
             values = [
-                request.getHeader(header_prop, '').strip()
-                for header_prop in headers]
+                request.getHeader(header_prop, "").strip() for header_prop in headers
+            ]
             if parser is not None:
                 values = [parse(parser, value) for value in values]
             if len(values) == 1:
