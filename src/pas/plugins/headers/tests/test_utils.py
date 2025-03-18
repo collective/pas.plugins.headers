@@ -1,5 +1,4 @@
 from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
-from plone import api
 
 import unittest
 
@@ -23,7 +22,7 @@ class TestGetPlugin(unittest.TestCase):
         from pas.plugins.headers.utils import get_plugin
         from pas.plugins.headers.utils import PLUGIN_ID
 
-        pas = api.portal.get_tool("acl_users")
+        pas = self.portal.acl_users
         pas._delObject(PLUGIN_ID)
         self.assertIsNone(get_plugin(self.portal))
 
@@ -32,7 +31,7 @@ class TestGetPlugin(unittest.TestCase):
         from pas.plugins.headers.utils import PLUGIN_ID
         from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 
-        pas = api.portal.get_tool("acl_users")
+        pas = self.portal.acl_users
         pas._delObject(PLUGIN_ID)
         pas._setObject(PLUGIN_ID, BasePlugin())
         self.assertIsNone(get_plugin(self.portal))
