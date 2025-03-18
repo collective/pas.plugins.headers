@@ -5,7 +5,7 @@ from plone.app.testing import setRoles
 from plone.app.testing import SITE_OWNER_NAME
 from plone.app.testing import TEST_USER_ID
 from plone.app.testing import TEST_USER_NAME
-from plone.testing.z2 import Browser
+from plone.testing.zope import Browser
 from zExceptions import Forbidden
 from zExceptions import Unauthorized
 
@@ -43,54 +43,46 @@ class TestUnderscoresAndDashes(unittest.TestCase):
         self.portal = self.layer["portal"]
         self.portal_url = self.portal.absolute_url()
         self.plugin = self.portal.acl_users.request_headers
+        self.browser = Browser(self.app)
+        self.browser.handleErrors = False
 
     def test_userid_header_dashes(self):
         self.plugin.userid_header = "REMOTE-USER"
         transaction.commit()
-        browser = Browser(self.app)
-        browser.handleErrors = False
-        browser.addHeader("REMOTE-USER", SITE_OWNER_NAME)
-        browser.open(self.portal_url + "/headerlogin")
-        self.assertEqual(browser.url, self.portal_url)
+        self.browser.addHeader("REMOTE-USER", SITE_OWNER_NAME)
+        self.browser.open(self.portal_url + "/headerlogin")
+        self.assertEqual(self.browser.url, self.portal_url)
 
     def test_userid_header_underscores(self):
         self.plugin.userid_header = "REMOTE_USER"
         transaction.commit()
-        browser = Browser(self.app)
-        browser.handleErrors = False
-        browser.addHeader("REMOTE_USER", SITE_OWNER_NAME)
-        browser.open(self.portal_url + "/headerlogin")
-        self.assertEqual(browser.url, self.portal_url)
+        self.browser.addHeader("REMOTE_USER", SITE_OWNER_NAME)
+        self.browser.open(self.portal_url + "/headerlogin")
+        self.assertEqual(self.browser.url, self.portal_url)
 
     def test_userid_header_underscores_http(self):
         self.plugin.userid_header = "REMOTE_USER"
         transaction.commit()
-        browser = Browser(self.app)
-        browser.handleErrors = False
         # This will fail because it will really result in a
         # header HTTP_HTTP_REMOTE_USER.
-        browser.addHeader("HTTP_REMOTE_USER", SITE_OWNER_NAME)
-        browser.open(self.portal_url + "/headerlogin")
+        self.browser.addHeader("HTTP_REMOTE_USER", SITE_OWNER_NAME)
+        self.browser.open(self.portal_url + "/headerlogin")
         # We are anonymous, so headerlogin redirects us to standard login.
-        self.assertEqual(browser.url, self.portal_url + "/login")
+        self.assertEqual(self.browser.url, self.portal_url + "/login")
 
     def test_userid_header_dash_underscore(self):
         self.plugin.userid_header = "REMOTE-USER"
         transaction.commit()
-        browser = Browser(self.app)
-        browser.handleErrors = False
-        browser.addHeader("REMOTE_USER", SITE_OWNER_NAME)
-        browser.open(self.portal_url + "/headerlogin")
-        self.assertEqual(browser.url, self.portal_url)
+        self.browser.addHeader("REMOTE_USER", SITE_OWNER_NAME)
+        self.browser.open(self.portal_url + "/headerlogin")
+        self.assertEqual(self.browser.url, self.portal_url)
 
     def test_userid_header_underscore_dash(self):
         self.plugin.userid_header = "REMOTE_USER"
         transaction.commit()
-        browser = Browser(self.app)
-        browser.handleErrors = False
-        browser.addHeader("REMOTE-USER", SITE_OWNER_NAME)
-        browser.open(self.portal_url + "/headerlogin")
-        self.assertEqual(browser.url, self.portal_url)
+        self.browser.addHeader("REMOTE-USER", SITE_OWNER_NAME)
+        self.browser.open(self.portal_url + "/headerlogin")
+        self.assertEqual(self.browser.url, self.portal_url)
 
 
 class TestFull(unittest.TestCase):
@@ -208,7 +200,7 @@ class TestFull(unittest.TestCase):
         transaction.commit()
         self.browser.addHeader("REMOTEUSER", TEST_USER_ID)
         with self.assertRaises(Unauthorized):
-            self.browser.open(self.portal_url + "/@@overview-controlpanel")
+            self.browser.open(self.portal_url + "/@@overview-controlpanel") # XXX
         self.browser.addHeader("ROLES", "Manager")
         # Now it works.
         self.browser.open(self.portal_url + "/@@overview-controlpanel")
@@ -218,13 +210,14 @@ class TestFull(unittest.TestCase):
     def test_redirect_from_unauthorized(self):
         # An anonymous user cannot access the overview controlpanel.
         with self.assertRaises(Unauthorized):
-            self.browser.open(self.portal_url + "/@@overview-controlpanel")
+            self.browser.open(self.portal_url + "/@@overview-controlpanel") # XXX
 
         # We want to check if the user gets redirected to /headerlogin.
         # But headerlogin redirects us to /login,
         # and I see no way to ask the test browser to not follow redirects.
         # Let's start with letting the browser handle exceptions then.
         self.browser.handleErrors = True
+
         self.browser.open(self.portal_url + "/@@overview-controlpanel")
         self.assertEqual(self.browser.url, self.portal_url + "/login")
 
@@ -233,7 +226,7 @@ class TestFull(unittest.TestCase):
         self.plugin.redirect_url = "headerlogin"
         transaction.commit()
         self.browser.handleErrors = True
-        self.browser.open(self.portal_url + "/@@overview-controlpanel")
+        self.browser.open(self.portal_url + "/@@overview-controlpanel") # XXX
         self.assertEqual(self.browser.url, self.portal_url + "/login")
 
     def test_redirect_url_double_slash(self):
@@ -253,7 +246,7 @@ class TestFull(unittest.TestCase):
         self.plugin.redirect_url = b"headerlogin"
         transaction.commit()
         self.browser.handleErrors = True
-        self.browser.open(self.portal_url + "/@@overview-controlpanel")
+        self.browser.open(self.portal_url + "/@@overview-controlpanel") # XXX
         self.assertEqual(self.browser.url, self.portal_url + "/login")
 
     def test_redirect_came_from_login(self):

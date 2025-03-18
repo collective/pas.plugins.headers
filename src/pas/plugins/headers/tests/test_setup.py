@@ -72,7 +72,7 @@ class TestUninstall(unittest.TestCase):
         self.portal = self.layer["portal"]
         self.installer = get_installer(self.portal)
         member = getToolByName(
-            self.context, "portal_membership"
+            self.portal, "portal_membership"
         ).getAuthenticatedMember()
         roles_before = member.getRoles()
         setRoles(self.portal, TEST_USER_ID, ["Manager"])

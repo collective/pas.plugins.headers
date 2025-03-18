@@ -1,6 +1,6 @@
 from plone.base.navigationroot import get_navigation_root
 from Products.Five import BrowserView
-from Products.GenericSetup.utils import getToolByName
+from Products.CMFCore.utils import getToolByName
 from urllib import parse
 from zExceptions import Forbidden
 
@@ -66,8 +66,7 @@ class HeaderLogin(BrowserView):
             return
 
         if not url:
-            nav_root = get_navigation_root(self.context)
-            url = nav_root.absolute_url()
+            url = get_navigation_root(self.context)
         # Temporary redirect.
         # Note: zope.publisher makes this 302 for HTTP/1.0 and 303 for higher.
         self.request.response.redirect(url)
