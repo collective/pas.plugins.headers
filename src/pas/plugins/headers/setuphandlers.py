@@ -1,7 +1,7 @@
 from pas.plugins.headers.plugins import HeaderPlugin
 from pas.plugins.headers.utils import PLUGIN_ID
+from plone.base.interfaces import INonInstallable
 from Products.CMFCore.utils import getToolByName
-from Products.CMFPlone.interfaces import INonInstallable
 from zope.interface import implementer
 
 import logging

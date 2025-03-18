@@ -63,7 +63,7 @@
 
   <browser:page
       name="headerlogin"
-      for="plone.app.layout.navigation.interfaces.INavigationRoot"
+      for="plon.base.interfaces.INavigationRoot"
       class=".browser.HeaderLogin"
       permission="zope.Public"
       />

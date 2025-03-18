@@ -12,7 +12,6 @@ from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from Products.PluggableAuthService.utils import classImplements
 
 import logging
-import six
 
 
 logger = logging.getLogger(__name__)
@@ -58,8 +57,6 @@ def combine_values(values):
     values = filter(None, values)
     full = " ".join(values)
     # Encode the result to string on Python 2.
-    if six.PY2:
-        return full.encode("utf-8")
     return full
 
 
@@ -163,9 +160,7 @@ class HeaderPlugin(BasePlugin):
             return True
         if self.redirect_url:
             url = self.redirect_url
-            # url is expected to be a native string both on Py 2 and 3,
-            # but I have seen it as bytes on Py 3 in a traceback.
-            if six.PY3 and isinstance(url, bytes):
+            if isinstance(url, bytes):
                 url = url.decode("utf-8")
             # If url is headerlogin, we want localhost:8080/Plone/headerlogin
             # and not localhost:8080/Plone/current-folder/headerlogin.
