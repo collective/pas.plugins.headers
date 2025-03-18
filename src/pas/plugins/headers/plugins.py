@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .parsers import parse
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
@@ -28,7 +27,7 @@ def decode_header(value):
     Firefox plugin gives me latin-1.
     The same might be true for the live server.
     """
-    if not isinstance(value, six.binary_type):
+    if not isinstance(value, bytes):
         return value
     try:
         return value.decode("utf-8")
@@ -57,7 +56,7 @@ def combine_values(values):
     values = [decode_header(value).strip() for value in values]
     # again filter out empty values
     values = filter(None, values)
-    full = u" ".join(values)
+    full = " ".join(values)
     # Encode the result to string on Python 2.
     if six.PY2:
         return full.encode("utf-8")
@@ -178,7 +177,7 @@ class HeaderPlugin(BasePlugin):
                     # Avoid getting .../Ploneheaderlogin as url.
                     url = "/" + url
                 url = api.portal.get().absolute_url() + url
-            url = "{}?came_from={}".format(url, request.URL)
+            url = f"{url}?came_from={request.URL}"
             logger.warning("Redirecting to %s", url)
             response.redirect(url, lock=1)
             return True

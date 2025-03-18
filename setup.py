@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Installer for the pas.plugins.headers package."""
 
 from setuptools import find_packages
@@ -24,20 +23,19 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
         "Framework :: Plone",
-        "Framework :: Plone :: 4.3",
-        "Framework :: Plone :: 5.1",
-        "Framework :: Plone :: 5.2",
+        "Framework :: Plone :: Addon",
         "Framework :: Plone :: 6.0",
+        "Framework :: Plone :: 6.1",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Operating System :: OS Independent",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
-    keywords="Python Plone Zope PAS acl_users SAML",
+    keywords="Plone, Zope, PAS, acl_users, SAML, Shibboleth",
     author="Maurits van Rees",
     author_email="m.van.rees@zestsoftware.nl",
     url="https://github.com/collective/pas.plugins.headers",
@@ -47,14 +45,7 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
-    install_requires=[
-        # -*- Extra requirements: -*-
-        # 'plone.api>=1.8.4',
-        "Products.GenericSetup>=1.8.2",
-        "Products.PluggableAuthService",
-        "setuptools",
-        "six>=1.12.0",
-    ],
+    install_requires=["Products.GenericSetup", "Products.PluggableAuthService", q],
     extras_require={
         "test": [
             "plone.api",

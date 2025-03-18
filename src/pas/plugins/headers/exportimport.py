@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from pas.plugins.headers.plugins import HeaderPlugin
 from pas.plugins.headers.utils import get_plugin
 from pas.plugins.headers.utils import PLUGIN_ID
@@ -27,7 +26,7 @@ def import_properties(context):
     if not isinstance(props, dict):
         # logger.error('%s does not contain a json dictionary.', FILENAME)
         # return
-        raise ValueError("{0} does not contain a json dictionary.".format(FILENAME))
+        raise ValueError(f"{FILENAME} does not contain a json dictionary.")
     purge = props.pop("purge", False)
     if purge:
         for prop_name in plugin.propertyIds():

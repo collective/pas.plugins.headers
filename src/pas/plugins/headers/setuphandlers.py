@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from pas.plugins.headers.plugins import HeaderPlugin
 from pas.plugins.headers.utils import PLUGIN_ID
 from Products.CMFCore.utils import getToolByName
@@ -12,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 @implementer(INonInstallable)
-class HiddenProfiles(object):
+class HiddenProfiles:
     def getNonInstallableProfiles(self):  # pragma: no cover
         """Hide uninstall profile from site-creation and quickinstaller."""
         return [
@@ -35,9 +34,7 @@ def post_install(context):
         logger.info("Created %s in acl_users.", PLUGIN_ID)
     plugin = getattr(pas, PLUGIN_ID)
     if not isinstance(plugin, HeaderPlugin):
-        raise ValueError(
-            "Existing PAS plugin {0} is not a HeaderPlugin.".format(PLUGIN_ID)
-        )
+        raise ValueError(f"Existing PAS plugin {PLUGIN_ID} is not a HeaderPlugin.")
 
     # Activate all supported interfaces for this plugin.
     activate = []

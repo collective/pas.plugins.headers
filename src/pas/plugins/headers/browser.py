@@ -1,34 +1,31 @@
-# -*- coding: utf-8 -*-
 from plone import api
 from Products.Five import BrowserView
-from six.moves.urllib import parse
+from urllib import parse
 from zExceptions import Forbidden
 
 
 # List taken over from browser/login/login.py in CMFPlone 5.2.
-LOGIN_TEMPLATE_IDS = set(
-    [
-        "localhost",
-        "logged-out",
-        "logged_in",
-        "login",
-        "login_failed",
-        "login_form",
-        "login_password",
-        "login_success",
-        "logout",
-        "mail_password",
-        "mail_password_form",
-        "member_search_results",
-        "pwreset_finish",
-        "passwordreset",
-        "register",
-        "registered",
-        "require_login",
-        # Extra for us:
-        "headerlogin",
-    ]
-)
+LOGIN_TEMPLATE_IDS = {
+    "localhost",
+    "logged-out",
+    "logged_in",
+    "login",
+    "login_failed",
+    "login_form",
+    "login_password",
+    "login_success",
+    "logout",
+    "mail_password",
+    "mail_password_form",
+    "member_search_results",
+    "pwreset_finish",
+    "passwordreset",
+    "register",
+    "registered",
+    "require_login",
+    # Extra for us:
+    "headerlogin",
+}
 
 
 class HeaderLogin(BrowserView):

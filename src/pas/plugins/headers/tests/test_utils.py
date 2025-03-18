@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
 from plone import api
 
@@ -58,7 +57,7 @@ class TestSafeMakeString(unittest.TestCase):
 
         self.assertEqual(safe_make_string(b""), "")
         self.assertEqual(safe_make_string(""), "")
-        self.assertEqual(safe_make_string(u""), "")
+        self.assertEqual(safe_make_string(""), "")
 
         # e-with-an-accent.
         if isinstance("", bytes):
@@ -69,10 +68,10 @@ class TestSafeMakeString(unittest.TestCase):
             expected = "\xeb"
         self.assertEqual(safe_make_string(b"\xc3\xab"), expected)
         self.assertEqual(safe_make_string(expected), expected)
-        self.assertEqual(safe_make_string(u"\xeb"), expected)
+        self.assertEqual(safe_make_string("\xeb"), expected)
 
         self.assertEqual(
-            safe_make_string([1, b"two", "three", u"four"]), [1, "two", "three", "four"]
+            safe_make_string([1, b"two", "three", "four"]), [1, "two", "three", "four"]
         )
 
         self.assertEqual(safe_make_string(0), 0)
