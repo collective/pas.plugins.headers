@@ -49,7 +49,6 @@ setup(
     install_requires=[
         "AccessControl",
         "plone.base",
-        "Products.Five",
         "Products.GenericSetup",
         "Products.PluggableAuthService",
         "zExceptions",
