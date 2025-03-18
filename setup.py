@@ -45,7 +45,7 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
-    install_requires=["Products.GenericSetup", "Products.PluggableAuthService", q],
+    install_requires=["Products.GenericSetup", "Products.PluggableAuthService"],
     extras_require={
         "test": [
             "plone.api",

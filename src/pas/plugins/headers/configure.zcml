@@ -4,27 +4,31 @@
     xmlns:five="http://namespaces.zope.org/five"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
     xmlns:i18n="http://namespaces.zope.org/i18n"
-    i18n_domain="pas.plugins.headers">
+    i18n_domain="pas.plugins.headers"
+    >
 
-  <five:registerPackage package="." initialize=".initialize" />
+  <five:registerPackage
+      package="."
+      initialize=".initialize"
+      />
 
   <i18n:registerTranslations directory="locales" />
 
   <genericsetup:registerProfile
       name="default"
       title="pas.plugins.headers"
-      directory="profiles/default"
       description="Installs the pas.plugins.headers add-on."
       provides="Products.GenericSetup.interfaces.EXTENSION"
+      directory="profiles/default"
       post_handler=".setuphandlers.post_install"
       />
 
   <genericsetup:registerProfile
       name="uninstall"
       title="pas.plugins.headers (uninstall)"
-      directory="profiles/uninstall"
       description="Uninstalls the pas.plugins.headers add-on."
       provides="Products.GenericSetup.interfaces.EXTENSION"
+      directory="profiles/uninstall"
       post_handler=".setuphandlers.uninstall"
       />
 
@@ -32,8 +36,9 @@
       name="pas.plugins.headers"
       title="Header Plugin Properties"
       description="Import properties for the request_headers HeaderPlugin."
-      handler="pas.plugins.headers.exportimport.import_properties">
-    <depends name="toolset"/>
+      handler="pas.plugins.headers.exportimport.import_properties"
+      >
+    <depends name="toolset" />
   </genericsetup:importStep>
 
   <genericsetup:exportStep
@@ -44,10 +49,10 @@
       />
 
   <genericsetup:upgradeStep
+      title="Activate ICredentialsResetPlugin"
+      profile="pas.plugins.headers:default"
       source="1000"
       destination="1001"
-      profile="pas.plugins.headers:default"
-      title="Activate ICredentialsResetPlugin"
       handler="pas.plugins.headers.setuphandlers.activate_credentials_reset_plugin"
       />
 
@@ -59,8 +64,8 @@
   <browser:page
       name="headerlogin"
       for="plone.app.layout.navigation.interfaces.INavigationRoot"
-      permission="zope.Public"
       class=".browser.HeaderLogin"
+      permission="zope.Public"
       />
 
 </configure>

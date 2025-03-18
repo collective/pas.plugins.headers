@@ -2,7 +2,6 @@ from io import BytesIO
 from zope.publisher.browser import TestRequest
 from ZPublisher.HTTPResponse import HTTPResponse
 
-import six
 import unittest
 
 
@@ -64,7 +63,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(decode_header(""), "")
         self.assertEqual(decode_header(b""), "")
         self.assertTrue(isinstance(decode_header(""), str))
-        # u'\xae' is (R)egistered trademark.
+        # u'\xae' is (R) registered trademark.
         self.assertEqual(decode_header("\xae"), "\xae")  # unicode
         self.assertEqual(decode_header(b"\xc2\xae"), "\xae")  # utf-8
         self.assertEqual(decode_header(b"\xae"), "\xae")  # latin-1

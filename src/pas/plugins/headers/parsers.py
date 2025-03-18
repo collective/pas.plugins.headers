@@ -1,6 +1,5 @@
 # Define parsers for header values.
 import logging
-import six
 
 
 logger = logging.getLogger(__name__)
