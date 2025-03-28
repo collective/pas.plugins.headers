@@ -1,6 +1,6 @@
 """Setup tests for this package."""
 
-from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_FUNCTIONAL_TESTING
+from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
 from plone.app.testing import setRoles
 from plone.app.testing import SITE_OWNER_NAME
 from plone.app.testing import TEST_USER_ID
@@ -36,7 +36,7 @@ class TestUnderscoresAndDashes(unittest.TestCase):
     So let's do some tests.
     """
 
-    layer = PAS_PLUGINS_HEADERS_FUNCTIONAL_TESTING
+    layer = PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
 
     def setUp(self):
         self.app = self.layer["app"]
@@ -88,7 +88,7 @@ class TestUnderscoresAndDashes(unittest.TestCase):
 class TestFull(unittest.TestCase):
     """Test that the package works as intended."""
 
-    layer = PAS_PLUGINS_HEADERS_FUNCTIONAL_TESTING
+    layer = PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
 
     def setUp(self):
         self.app = self.layer["app"]
