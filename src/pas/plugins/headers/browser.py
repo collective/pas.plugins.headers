@@ -1,6 +1,6 @@
 from plone.base.navigationroot import get_navigation_root
-from Products.Five import BrowserView
 from Products.CMFCore.utils import getToolByName
+from Products.Five import BrowserView
 from urllib import parse
 from zExceptions import Forbidden
 
