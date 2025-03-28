@@ -42,10 +42,11 @@ class TestAuthTicket(unittest.TestCase):
         response = request.response
         self.assertIn("__ac", response.cookies)
         cookie = response.cookies["__ac"]
-        value = cookie.pop("value", None)
+        value = cookie.pop("value",
+         None)
         self.assertIsNotNone(value)
         self.assertDictEqual(
-            cookie, {"path": "/", "secure": False, "http_only": True, "quoted": True}
+            cookie, {'Path': '/', 'Secure': None, 'HttpOnly': True, 'SameSite': 'Lax'}
         )
 
         # Now set the cookie from the response on the request,
