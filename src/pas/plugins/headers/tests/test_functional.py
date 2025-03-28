@@ -200,7 +200,7 @@ class TestFull(unittest.TestCase):
         transaction.commit()
         self.browser.addHeader("REMOTEUSER", TEST_USER_ID)
         with self.assertRaises(Unauthorized):
-            self.browser.open(self.portal_url + "/@@overview-controlpanel") # XXX
+            self.browser.open(self.portal_url + "/@@overview-controlpanel")  # XXX
         self.browser.addHeader("ROLES", "Manager")
         # Now it works.
         self.browser.open(self.portal_url + "/@@overview-controlpanel")
@@ -210,7 +210,7 @@ class TestFull(unittest.TestCase):
     def test_redirect_from_unauthorized(self):
         # An anonymous user cannot access the overview controlpanel.
         with self.assertRaises(Unauthorized):
-            self.browser.open(self.portal_url + "/@@overview-controlpanel") # XXX
+            self.browser.open(self.portal_url + "/@@overview-controlpanel")  # XXX
 
         # We want to check if the user gets redirected to /headerlogin.
         # But headerlogin redirects us to /login,
@@ -226,7 +226,7 @@ class TestFull(unittest.TestCase):
         self.plugin.redirect_url = "headerlogin"
         transaction.commit()
         self.browser.handleErrors = True
-        self.browser.open(self.portal_url + "/@@overview-controlpanel") # XXX
+        self.browser.open(self.portal_url + "/@@overview-controlpanel")  # XXX
         self.assertEqual(self.browser.url, self.portal_url + "/login")
 
     def test_redirect_url_double_slash(self):
@@ -246,7 +246,7 @@ class TestFull(unittest.TestCase):
         self.plugin.redirect_url = b"headerlogin"
         transaction.commit()
         self.browser.handleErrors = True
-        self.browser.open(self.portal_url + "/@@overview-controlpanel") # XXX
+        self.browser.open(self.portal_url + "/@@overview-controlpanel")  # XXX
         self.assertEqual(self.browser.url, self.portal_url + "/login")
 
     def test_redirect_came_from_login(self):
