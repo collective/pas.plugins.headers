@@ -171,7 +171,10 @@ class HeaderPlugin(BasePlugin):
                 if not url.startswith("/"):
                     # Avoid getting .../Ploneheaderlogin as url.
                     url = "/" + url
-                url = getToolByName(self, "portal_url").getPortalObject().absolute_url() + url
+                url = (
+                    getToolByName(self, "portal_url").getPortalObject().absolute_url()
+                    + url
+                )
             url = f"{url}?came_from={request.URL}"
             logger.warning("Redirecting to %s", url)
             response.redirect(url, lock=1)
