@@ -105,6 +105,9 @@ class TestFull(unittest.TestCase):
         transaction.commit()
         self.browser = Browser(self.app)
         self.browser.handleErrors = False
+        # initialize browser https://github.com/collective/pas.plugins.headers/pull/20#issuecomment-2761161864
+        # this for some reason enables the system to shows the real error on unauthorized
+        self.browser.open(self.portal_url)
 
     def _set_referer(self, referer=None):
         # Some zope.testbrowser versions set a Referer, but not all.

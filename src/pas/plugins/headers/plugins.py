@@ -1,6 +1,7 @@
 from .parsers import parse
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
+from Products.CMFCore.utils import getToolByName
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
 from Products.PluggableAuthService.interfaces.plugins import ICredentialsResetPlugin
@@ -170,8 +171,7 @@ class HeaderPlugin(BasePlugin):
                 if not url.startswith("/"):
                     # Avoid getting .../Ploneheaderlogin as url.
                     url = "/" + url
-
-                url = self.context.portal_url.getPortalObject().absolute_url() + url
+                url = getToolByName(self, "portal_url").getPortalObject().absolute_url() + url
             url = f"{url}?came_from={request.URL}"
             logger.warning("Redirecting to %s", url)
             response.redirect(url, lock=1)
