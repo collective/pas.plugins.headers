@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 from .parsers import parse
 from AccessControl import ClassSecurityInfo
 from AccessControl.class_init import InitializeClass
-from plone import api
+from Products.CMFCore.utils import getToolByName
 from Products.PluggableAuthService.interfaces.plugins import IAuthenticationPlugin
 from Products.PluggableAuthService.interfaces.plugins import IChallengePlugin
 from Products.PluggableAuthService.interfaces.plugins import ICredentialsResetPlugin
@@ -13,7 +12,6 @@ from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 from Products.PluggableAuthService.utils import classImplements
 
 import logging
-import six
 
 
 logger = logging.getLogger(__name__)
@@ -28,7 +26,7 @@ def decode_header(value):
     Firefox plugin gives me latin-1.
     The same might be true for the live server.
     """
-    if not isinstance(value, six.binary_type):
+    if not isinstance(value, bytes):
         return value
     try:
         return value.decode("utf-8")
@@ -57,10 +55,8 @@ def combine_values(values):
     values = [decode_header(value).strip() for value in values]
     # again filter out empty values
     values = filter(None, values)
-    full = u" ".join(values)
+    full = " ".join(values)
     # Encode the result to string on Python 2.
-    if six.PY2:
-        return full.encode("utf-8")
     return full
 
 
@@ -164,9 +160,7 @@ class HeaderPlugin(BasePlugin):
             return True
         if self.redirect_url:
             url = self.redirect_url
-            # url is expected to be a native string both on Py 2 and 3,
-            # but I have seen it as bytes on Py 3 in a traceback.
-            if six.PY3 and isinstance(url, bytes):
+            if isinstance(url, bytes):
                 url = url.decode("utf-8")
             # If url is headerlogin, we want localhost:8080/Plone/headerlogin
             # and not localhost:8080/Plone/current-folder/headerlogin.
@@ -177,8 +171,11 @@ class HeaderPlugin(BasePlugin):
                 if not url.startswith("/"):
                     # Avoid getting .../Ploneheaderlogin as url.
                     url = "/" + url
-                url = api.portal.get().absolute_url() + url
-            url = "{}?came_from={}".format(url, request.URL)
+                url = (
+                    getToolByName(self, "portal_url").getPortalObject().absolute_url()
+                    + url
+                )
+            url = f"{url}?came_from={request.URL}"
             logger.warning("Redirecting to %s", url)
             response.redirect(url, lock=1)
             return True

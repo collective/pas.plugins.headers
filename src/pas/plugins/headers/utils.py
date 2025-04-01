@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
 from Products.CMFCore.utils import getToolByName
-
-import six
 
 
 PLUGIN_ID = "request_headers"
@@ -34,7 +31,6 @@ def safe_make_string(value):
     """
     if isinstance(value, (list, tuple, set)):
         return [safe_make_string(v) for v in value]
-    try:
-        return six.ensure_str(value)
-    except TypeError:
-        return value
+    if isinstance(value, bytes):
+        return value.decode("utf-8")
+    return value

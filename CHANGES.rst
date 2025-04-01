@@ -2,10 +2,17 @@ Changelog
 =========
 
 
-1.5.1 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update addon using plone.meta
+  [@jensens]
+
+- Add support for Plone 6
+  [@jensens]
+
+- Drop support for Plone 4.x and Plone 5.x
+  [@jensens]
 
 
 1.5.0 (2022-01-06)

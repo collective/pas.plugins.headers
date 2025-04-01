@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
 """Setup tests for this package."""
+
 from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
 from pas.plugins.headers.utils import get_plugin
+from Products.CMFCore.utils import getToolByName
 
 import json
 import unittest
 
 
-class FauxContext(object):
+class FauxContext:
     def __init__(self, site=None, content=None):
         self.site = site
         self.content = content
@@ -62,9 +63,8 @@ class ExportImportBaseTestCase(unittest.TestCase):
     def _removePlugin(self):
         """Remove the plugin."""
         from pas.plugins.headers.utils import PLUGIN_ID
-        from plone import api
 
-        pas = api.portal.get_tool("acl_users")
+        pas = getToolByName(self.portal, "acl_users")
         pas._delObject(PLUGIN_ID)
 
     def assert_plugin_has_test_settings(self):

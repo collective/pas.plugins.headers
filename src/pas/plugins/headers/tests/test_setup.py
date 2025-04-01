@@ -1,20 +1,12 @@
-# -*- coding: utf-8 -*-
 """Setup tests for this package."""
+
 from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_INTEGRATION_TESTING
-from plone import api
 from plone.app.testing import setRoles
 from plone.app.testing import TEST_USER_ID
+from plone.base.utils import get_installer
+from Products.CMFCore.utils import getToolByName
 
 import unittest
-
-
-try:
-    # Plone 5.1+
-    from Products.CMFPlone.utils import get_installer
-except ImportError:
-    # Plone 5.0/4.3
-    def get_installer(context, request=None):
-        return api.portal.get_tool("portal_quickinstaller")
 
 
 class TestSetup(unittest.TestCase):
@@ -40,7 +32,7 @@ class TestSetup(unittest.TestCase):
         from pas.plugins.headers.plugins import HeaderPlugin
         from pas.plugins.headers.utils import PLUGIN_ID
 
-        pas = api.portal.get_tool("acl_users")
+        pas = self.portal.acl_users
         self.assertIn(PLUGIN_ID, pas.objectIds())
         plugin = getattr(pas, PLUGIN_ID)
         self.assertIsInstance(plugin, HeaderPlugin)
@@ -50,7 +42,7 @@ class TestSetup(unittest.TestCase):
         from pas.plugins.headers.utils import PLUGIN_ID
         from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 
-        pas = api.portal.get_tool("acl_users")
+        pas = self.portal.acl_users
         pas._delObject(PLUGIN_ID)
         pas._setObject(PLUGIN_ID, BasePlugin())
         from pas.plugins.headers.setuphandlers import post_install
@@ -63,7 +55,7 @@ class TestSetup(unittest.TestCase):
         from pas.plugins.headers.utils import PLUGIN_ID
         from Products.PluggableAuthService.plugins.BasePlugin import BasePlugin
 
-        pas = api.portal.get_tool("acl_users")
+        pas = self.portal.acl_users
         pas._delObject(PLUGIN_ID)
         pas._setObject(PLUGIN_ID, BasePlugin())
         from pas.plugins.headers.setuphandlers import uninstall
@@ -79,7 +71,10 @@ class TestUninstall(unittest.TestCase):
     def setUp(self):
         self.portal = self.layer["portal"]
         self.installer = get_installer(self.portal)
-        roles_before = api.user.get_roles(TEST_USER_ID)
+        member = getToolByName(
+            self.portal, "portal_membership"
+        ).getAuthenticatedMember()
+        roles_before = member.getRoles()
         setRoles(self.portal, TEST_USER_ID, ["Manager"])
         if hasattr(self.installer, "uninstall_product"):
             self.installer.uninstall_product("pas.plugins.headers")
@@ -99,7 +94,7 @@ class TestUninstall(unittest.TestCase):
         """Test if the plugin is removed from acl_users."""
         from pas.plugins.headers.utils import PLUGIN_ID
 
-        pas = api.portal.get_tool("acl_users")
+        pas = self.portal.acl_users
         self.assertNotIn(PLUGIN_ID, pas.objectIds())
 
     def test_double_uninstall(self):

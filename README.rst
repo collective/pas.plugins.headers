@@ -28,32 +28,37 @@ You can configure them in the ZMI (Zope Management Interface) by editing propert
 Installation
 ------------
 
-Install pas.plugins.headers by adding it to your buildout::
+Install pas.plugins.headers by adding it to your setup.
+
+Add a line ``pas.plugins.headers`` to the ``requirements.txt`` or to the ``pyproject.toml`` file (under ``dependencies``)  of your setup.
+
+Then re-apply the installation, i.e. using your Makefile or running ``pip install -e .`` in your project.
+
+With ``buildout``, you can do this by adding it to the eggs line for your instance::
 
     [buildout]
-
     ...
-
     eggs =
         pas.plugins.headers
 
-
 and then running ``bin/buildout``.
-Start Plone and install the plugin in the Add-ons control panel.
+
+In either case, start Plone and install the plugin in the Add-ons control panel.
 
 
 Compatibility
 -------------
 
-This has been tested to work on Plone 4.3 and 5.1 and 5.2 (Python 2.7 and 3.7).
+This has been tested to work on Plone 6.0 and 6.1.
+For older version of Plone use the 1.x release series.
 
 
 Plain Zope?
 -----------
 
 No, this does not work in plain Zope.
-Theoretically it might work if you first install ``Products.PluggableAuthService`` and ``Products.GenericSetup``.
-But then you already almost have a ``CMF`` site.
+Theoretically it might work if you first install ``Products.PluggableAuthService``, ``Products.GenericSetup`` and ``plone.base``.
+But then you already almost have a ``CMF`` site with bits of Plone.
 
 
 Manual configuration

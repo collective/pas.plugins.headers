@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 """Setup tests for this package."""
+
 from pas.plugins.headers.testing import PAS_PLUGINS_HEADERS_FUNCTIONAL_TESTING
 from plone.app.testing import SITE_OWNER_NAME
 from plone.app.testing import SITE_OWNER_PASSWORD
-from plone.testing.z2 import Browser
+from plone.testing.zope import Browser
 from zExceptions import Forbidden
 
 import transaction
@@ -47,7 +47,7 @@ class TestHeaderLogin(unittest.TestCase):
     def test_redirect_basic_auth(self):
         self.browser.addHeader(
             "Authorization",
-            "Basic {0}:{1}".format(
+            "Basic {}:{}".format(
                 SITE_OWNER_NAME,
                 SITE_OWNER_PASSWORD,
             ),
@@ -65,20 +65,20 @@ class TestHeaderLogin(unittest.TestCase):
     def test_redirect_came_from_good(self):
         self.browser.addHeader(
             "Authorization",
-            "Basic {0}:{1}".format(
+            "Basic {}:{}".format(
                 SITE_OWNER_NAME,
                 SITE_OWNER_PASSWORD,
             ),
         )
         self.browser.open(
-            "{}/headerlogin?came_from={}/view".format(self.portal_url, self.portal_url)
+            f"{self.portal_url}/headerlogin?came_from={self.portal_url}/view"
         )
         self.assertEqual(self.browser.url, self.portal_url + "/view")
 
     def test_redirect_came_from_bad(self):
         self.browser.addHeader(
             "Authorization",
-            "Basic {0}:{1}".format(
+            "Basic {}:{}".format(
                 SITE_OWNER_NAME,
                 SITE_OWNER_PASSWORD,
             ),
