@@ -370,7 +370,33 @@ class HeaderPluginUnitTests(unittest.TestCase):
         # Check the response.
         out.seek(0)
         self.assertEqual(out.read(), b"")
+        self.assertEqual(response.getStatus(), 302)  # Check for Redirect
         self.assertEqual(response.headers["location"], f"{url}?came_from={request.URL}")
+
+    def test_challenge_break_redirect_cycle(self):
+        # Prepare the plugin.
+        from pas.plugins.headers.plugins import HeaderPlugin
+
+        plugin = HeaderPlugin()
+        url = "https://example.org/saml-login"
+        plugin.redirect_url = url
+
+        # Prepare the request.
+        request = HeaderRequest()
+        auth_header = "SAML_id"
+        plugin.userid_header = auth_header
+        request.addHeader(auth_header, "my uid")
+        out = BytesIO()
+        response = HTTPResponse(stdout=out)
+
+        # When the plugin does not make a challenge, it must returns None
+        self.assertIsNone(plugin.challenge(request, response))
+
+        # Check the response -  it must not contain a redirection ("location")
+        out.seek(0)
+        self.assertEqual(out.read(), b"")
+        self.assertEqual(response.getStatus(), 200)
+        self.assertIsNone(response.headers.get("location"))
 
     def test_extractCredentials(self):
         from pas.plugins.headers.plugins import HeaderPlugin

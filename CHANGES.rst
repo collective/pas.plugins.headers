@@ -5,6 +5,9 @@ Changelog
 2.0.0 (unreleased)
 ------------------
 
+- Fix: Breaking redirection cycle by checking for ``userid_header`` before redirecting
+  [@gogobd]
+
 - Update addon using plone.meta
   [@jensens]
 
