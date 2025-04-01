@@ -49,7 +49,7 @@ In either case, start Plone and install the plugin in the Add-ons control panel.
 Compatibility
 -------------
 
-This has been tested to work on Plone 6.0 and 6.1.
+This has been tested to work on Plone 6.0, 6.1, and 6.2.
 For older version of Plone use the 1.x release series.
 
 
