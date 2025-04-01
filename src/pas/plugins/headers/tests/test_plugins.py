@@ -371,9 +371,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         out.seek(0)
         self.assertEqual(out.read(), b"")
         self.assertEqual(response.getStatus(), 302)  # Check for Redirect
-        self.assertNotEqual(
-            response.headers["location"], f"{url}?came_from={request.URL}"
-        )
+        self.assertEqual(response.headers["location"], f"{url}?came_from={request.URL}")
 
     def test_challenge_break_redirect_cycle(self):
         # Prepare the plugin.
