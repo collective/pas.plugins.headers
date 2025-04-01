@@ -63,7 +63,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(decode_header(""), "")
         self.assertEqual(decode_header(b""), "")
         self.assertTrue(isinstance(decode_header(""), str))
-        # u'\xae' is (R) registered trademark.
+        # '\xae' is (R) registered trademark.
         self.assertEqual(decode_header("\xae"), "\xae")  # unicode
         self.assertEqual(decode_header(b"\xc2\xae"), "\xae")  # utf-8
         self.assertEqual(decode_header(b"\xae"), "\xae")  # latin-1
@@ -78,11 +78,6 @@ class HeaderPluginUnitTests(unittest.TestCase):
         self.assertEqual(combine_values(()), "")
         self.assertEqual(combine_values([b"Maurits"]), "Maurits")
         self.assertEqual(combine_values(["Maurits"]), "Maurits")
-        self.assertEqual(combine_values(["Maurits"]), "Maurits")
-        # On Python 2, 'Maurits' == u'Maurits' because both contain only ascii.
-        # But we *do* want to know if we get unicode or bytes back.
-        # Also, on Python 3 they are NOT the same at all.
-        # In all cases we want a string.
         self.assertTrue(isinstance(combine_values(["Maurits"]), str))
         self.assertEqual(combine_values(["Maurits", "Rees"]), "Maurits Rees")
         self.assertEqual(combine_values(["Maurits", "", "Rees"]), "Maurits Rees")
@@ -93,14 +88,7 @@ class HeaderPluginUnitTests(unittest.TestCase):
         )
         self.assertEqual(combine_values(("Arthur", "Dent")), "Arthur Dent")
 
-        # Now test non-ascii: Arthür with an accented u.
-        if isinstance("", bytes):
-            # On Python 2 we expect a string encoded with utf-8.
-            arthur = "Arth\xc3\xbcr"
-        else:
-            # On Python 3 we expect a native string.
-            arthur = "Arth\xfcr"
-
+        arthur = "Arth\xfcr"
         self.assertEqual(combine_values([b"Arth\xc3\xbcr", b"Dent"]), arthur + " Dent")
         self.assertTrue(isinstance(combine_values([b"Arth\xc3\xbcr"]), str))
         self.assertEqual(combine_values(["Arth\xfcr", "Dent"]), arthur + " Dent")

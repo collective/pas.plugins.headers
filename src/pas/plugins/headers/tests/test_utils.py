@@ -58,13 +58,7 @@ class TestSafeMakeString(unittest.TestCase):
         self.assertEqual(safe_make_string(""), "")
         self.assertEqual(safe_make_string(""), "")
 
-        # e-with-an-accent.
-        if isinstance("", bytes):
-            # On Python 2 we expect an encoded string.
-            expected = "\xc3\xab"
-        else:
-            # On Python 3 we expect a native string.
-            expected = "\xeb"
+        expected = "\xeb"
         self.assertEqual(safe_make_string(b"\xc3\xab"), expected)
         self.assertEqual(safe_make_string(expected), expected)
         self.assertEqual(safe_make_string("\xeb"), expected)
