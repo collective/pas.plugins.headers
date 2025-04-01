@@ -158,7 +158,7 @@ class HeaderPlugin(BasePlugin):
             # Yes, this must be bytes, not 'str' on Python 3.
             response.write(b"ERROR: denying any unauthorized access.\n")
             return True
-        if self.redirect_url and not request.get("HTTP_" + self.userid_header):
+        if self.redirect_url and not self._get_userid(request):
             url = self.redirect_url
             if isinstance(url, bytes):
                 url = url.decode("utf-8")
