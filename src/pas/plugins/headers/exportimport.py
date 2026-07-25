@@ -5,7 +5,6 @@ from pas.plugins.headers.utils import safe_make_string
 
 import json
 
-
 FILENAME = "pas.plugins.headers.json"
 
 
