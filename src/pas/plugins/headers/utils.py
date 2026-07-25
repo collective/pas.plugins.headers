@@ -1,6 +1,5 @@
 from Products.CMFCore.utils import getToolByName
 
-
 PLUGIN_ID = "request_headers"
 
 

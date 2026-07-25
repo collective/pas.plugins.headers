@@ -4,7 +4,6 @@ from Products.Five import BrowserView
 from urllib import parse
 from zExceptions import Forbidden
 
-
 # List taken over from browser/login/login.py in CMFPlone 5.2.
 LOGIN_TEMPLATE_IDS = {
     "localhost",

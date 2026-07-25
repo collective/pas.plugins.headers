@@ -13,7 +13,6 @@ from Products.PluggableAuthService.utils import classImplements
 
 import logging
 
-
 logger = logging.getLogger(__name__)
 # Marker value for missing headers
 _MARKER = object()
