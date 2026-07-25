@@ -1,7 +1,6 @@
 # Define parsers for header values.
 import logging
 
-
 logger = logging.getLogger(__name__)
 # yes, ja, true
 _true_chars = "y j t 1".split()
